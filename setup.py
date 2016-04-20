@@ -28,7 +28,7 @@ setup(
 	install_requires=["semver>=2.4.1,<3"],
 	# See https://pypi.python.org/pypi?%3Aaction=list_classifiers
 	classifiers=[
-		'Development Status :: 4 - Beta',
+		'Development Status :: 5 - Production/Stable',
 		'Environment :: Console',
 		'Intended Audience :: Developers',
 		'License :: OSI Approved :: MIT License',

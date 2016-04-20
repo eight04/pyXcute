@@ -55,7 +55,11 @@ Run it
 Changelog
 ---------
 
-* Version 0.1.0 (Apr 20, 2016)
+* 0.1.1 (Apr 20, 2016)
+
+  - Bump dev status.
+
+* 0.1.0 (Apr 20, 2016)
 
   - First release.
 

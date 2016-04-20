@@ -8,7 +8,7 @@ import re
 import traceback
 import itertools
 
-__version__ = "0.1.0"
+__version__ = "0.1.1"
 
 class Wrapper:
 	"""A wrapper class that init targets"""
