@@ -126,7 +126,7 @@ pyXcute will expand format string with ``xcute.conf`` dictionary. Extend it as y
 * old_version - version number before bump. Only available after Bump task.
 * tasks - a dictionary. This is what you send to ``cute()``.
 * init - command name.
-* args - additional arguments, list.
+* args - additional argument list.
 * name - the name of current task.
 	
 Live example
