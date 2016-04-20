@@ -6,52 +6,160 @@ A small task runner inspired from npm.
 Features
 --------
 
-* Interface like setuptools.
+* Use it like setuptools.
 * Chain tasks with ``_pre``, ``_err``, ``_post`` suffix.
 * A builtin Bump task which can bump version with `semver <https://github.com/k-bx/python-semver>`__.
 
 Install
 -------
 
-::
+.. code:: bash
 
 	pip install pyxcute
 
 Usage
 -----
 
-Create a ``cute.py`` file
+Basic
+~~~~~
 
-::
+Create a ``cute.py`` file like this:
 
-	from xcute import cute, Bump
+.. code:: python
 
+	from xcute import cute
+	
 	cute(
-		test = 'setup check -r',
-		bump_pre = 'test',
-		bump = Bump('xcute/__init__.py'),
-		bump_post = ['dist', 'release', 'publish', 'install'],
-		dist = 'python setup.py sdist bdist_wheel',
-		release = [
-			'git add .',
-			'git commit -m "Release v{version}"',
-			'git tag v{version}'
-		],
-		publish = [
-			'twine upload dist/*{version}*',
-			'git push --follow-tags'
-		],
-		install = 'pip install -e .',
-		install_err = 'elevate -c -w pip install -e .',
-		readme = 'python setup.py --long-description > %temp%/ld && rst2html %temp%/ld %temp%/ld.html && start %temp%/ld.html'
+		hello = 'echo hello xcute!'
 	)
 	
-Run it
+then run:
 
-::
+.. code:: bash
 
-	cute <your_command> <options>...
+	>cute hello
+	hello...
+	hello xcute!
+	
+If you didn't provide the command, it will try to execute ``default`` task.
+	
+Provide additional arguments:
 
+.. code:: bash
+
+	>cute hello 123
+	hello...
+	hello xcute! 123
+
+The arguments will be passed into the runner, which is ``xcute.Cmd.__call__`` in this case.
+
+Tasks
+~~~~~
+
+It can be a str:
+
+.. code:: python
+	
+	from xcute import cute
+	
+	cute(
+		hello = 'echo hello'
+	)
+	
+If it is the name of another task, it will execute that task:
+
+.. code:: python
+
+	from xcute import cute
+	
+	cute(
+		hello = 'world',
+		world = 'echo execute world task'
+	)
+	
+use a list:
+
+.. code:: python
+
+	from xcute import cute
+	
+	cute(
+		hello = ['echo task1', 'echo task2']
+	)
+	
+or anything that is callable:
+
+.. code:: python
+
+	from xcute import cute
+	
+	cute(
+		hello = lambda: print('say hello')
+	)
+
+Task chain
+~~~~~~~~~~
+	
+Define the workflow with ``_pre``, ``_err``, ``_post`` suffix:
+
+.. code:: python
+
+	from xcute import cute
+	
+	cute(
+		hello_pre = 'echo _pre runs before the task',
+		hello = 'echo say hello',
+		hello_err = 'echo _err runs if there is an error in task, i.e, an uncaught exception or non-zero return code',
+		hello_post = 'echo _post runs after the task if task successfully returned'
+	)
+	
+When a task is involved, it will firstly try to execute _pre task, then the task itself, then the _post task. If the task raised an exception, then it goes to _err task. Just like npm's scripts.
+
+Format string
+~~~~~~~~~~~~~
+
+pyXcute will expand format string with ``xcute.conf`` dictionary. Extend it as you need. By the default, it has following keys:
+
+* date - ``datetime.datetime.now()``.
+* tty - a boolean shows if the output is a terminal.
+* version - version number. Only available after Bump task or Version task.
+* old_version - version number before bump. Only available after Bump task.
+* tasks - a dictionary. This is what you send to ``cute()``.
+* init - command name.
+* args - additional arguments, list.
+* name - the name of current task.
+	
+Live example
+~~~~~~~~~~~~
+	
+Checkout `the cute file <https://github.com/eight04/pyXcute/blob/master/cute.py>`__ of pyXcute itself.
+
+xcute.Bump
+~~~~~~~~~~
+
+``Bump`` is a builtin task which can bump version like ``__version__ = '0.0.0'``
+
+.. code:: python
+
+	from xcute import cute, Bump
+	
+	cute(
+		bump = Bump('path/to/target/file')
+	)
+	
+then run
+
+.. code:: bash
+
+	cute bump [major|minor|patch|prerelease|build]
+	
+the argument is optional, default to ``patch``.
+
+xcute.Version
+~~~~~~~~~~~~~
+
+This task will extract the version number into ``conf``.
+	
 Changelog
 ---------
 
