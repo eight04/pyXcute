@@ -163,6 +163,10 @@ This task will extract the version number into ``conf``.
 Changelog
 ---------
 
+* 0.1.2 (Apr 20, 2016)
+
+  - Move _pre out of try clause.
+
 * 0.1.1 (Apr 20, 2016)
 
   - Bump dev status.
