@@ -33,7 +33,7 @@ setup(
 		'Intended Audience :: Developers',
 		'License :: OSI Approved :: MIT License',
 		'Natural Language :: Chinese (Traditional)',
-		'Programming Language :: Python :: 3.5'
+		'Programming Language :: Python :: 3.5',
 		'Topic :: Software Development :: Libraries :: Python Modules',
 		'Topic :: Software Development :: Build Tools'
 	],
