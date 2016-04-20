@@ -9,7 +9,7 @@ cute(
 	release = [
 		'git add .',
 		'git commit -m "Release v{version}"',
-		'git tag v{version}'
+		'git tag -a v{version} -m "Release v{version}"'
 	],
 	publish = [
 		'twine upload dist/*{version}*',
