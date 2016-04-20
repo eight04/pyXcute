@@ -19,7 +19,7 @@ def find_version(file):
 setup(
 	name="pyxcute",
 	version=find_version("xcute/__init__.py"),
-	description="A small task runner inspired from npm",
+	description="A small task runner inspired by npm scripts",
 	long_description=read("README.rst"),
 	author='eight',
 	author_email='eight04@gmail.com',

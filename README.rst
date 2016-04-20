@@ -1,7 +1,7 @@
 pyXcute
 =======
 
-A small task runner inspired from npm.
+A small task runner inspired by npm scripts.
 
 Features
 --------
