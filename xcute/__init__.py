@@ -146,8 +146,8 @@ def run_main(name, args):
 	if name not in conf["tasks"]:
 		raise Exception("Cannot find {name!r} in the cute file".format(name=name))
 		
+	run(name + "_pre")
 	try:
-		run(name + "_pre")
 		run(name, args)
 	except Exception:
 		if name + "_err" not in conf["tasks"]:
