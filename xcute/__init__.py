@@ -150,21 +150,23 @@ def run_main(name, args):
 	try:
 		run(name, args)
 	except Exception:
-		if name + "_err" not in conf["tasks"]:
+		if not run(name + "_err"):
 			raise
-		run(name + "_err")
 	else:
 		run(name + "_post")
+	finally:
+		run(name + "_fin")
 
 def run(name, args=[]):
 	"""Run middleware. It converts task name into user task if possible."""
 	if name not in conf["tasks"]:
-		return
+		return False
 		
 	conf["name"] = name
 	log("{name}...".format(name=name))
 		
 	run_task(conf["tasks"][name], args)
+	return True
 	
 def run_task(task, args=[]):
 	"""Run user task.
