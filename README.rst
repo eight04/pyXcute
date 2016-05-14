@@ -7,7 +7,7 @@ Features
 --------
 
 * Use it like setuptools.
-* Chain tasks with ``_pre``, ``_err``, ``_post`` suffix.
+* Chain tasks with ``_pre``, ``_err``, ``_post``, ``_fin`` suffix.
 * A builtin Bump task which can bump version with `semver <https://github.com/k-bx/python-semver>`__.
 
 Install
@@ -66,7 +66,7 @@ It can be a str:
 		hello = 'echo hello'
 	)
 	
-If it is the name of another task, it will execute that task:
+If it is the name of another task, pyxcute will execute that task:
 
 .. code:: python
 
@@ -100,7 +100,7 @@ or anything that is callable:
 Task chain
 ~~~~~~~~~~
 	
-Define the workflow with ``_pre``, ``_err``, ``_post`` suffix:
+Define the workflow with ``_pre``, ``_err``, ``_post``, ``_fin`` suffix:
 
 .. code:: python
 
@@ -110,10 +110,26 @@ Define the workflow with ``_pre``, ``_err``, ``_post`` suffix:
 		hello_pre = 'echo _pre runs before the task',
 		hello = 'echo say hello',
 		hello_err = 'echo _err runs if there is an error in task, i.e, an uncaught exception or non-zero return code',
-		hello_post = 'echo _post runs after the task if task successfully returned'
+		hello_post = 'echo _post runs after the task if task successfully returned',
+		hello_fin = 'echo _fin always runs after _post, _err just like finally'
 	)
 	
-When a task is involved, it will firstly try to execute _pre task, then the task itself, then the _post task. If the task raised an exception, then it goes to _err task. Just like npm's scripts.
+When a task is involved, it will firstly try to execute _pre task, then the task itself, then the _post task. If the task raised an exception, then it goes to _err task. And finally the _fin task.
+
+Pseudo code:
+
+.. code:: python
+
+	run(name + "_pre")
+	try:
+		run(name, args)
+	except Exception:
+		if run(name + "_err") not exist:
+			raise
+	else:
+		run(name + "_post")
+	finally:
+		run(name + "_fin")
 
 Format string
 ~~~~~~~~~~~~~
@@ -155,10 +171,36 @@ then run
 	
 the argument is optional, default to ``patch``.
 
+Here is the regex used by pyXcute:
+
+.. code:: python
+
+	"__version__ = ['\"]([^'\"]+)"
+
 xcute.Version
 ~~~~~~~~~~~~~
 
 This task will extract the version number into ``conf``.
+
+xcute.Exc
+~~~~~~~~~
+
+This task will raise an exception.
+
+.. code:: python
+
+	Exc([message])
+	
+If the message isn't provided, it will reraise the last exception.
+
+xcute.Exit
+~~~~~~~~~~
+
+This task will exit the process.
+
+.. code:: python
+
+	Exit([exit_code])
 	
 Changelog
 ---------
