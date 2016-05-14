@@ -90,6 +90,21 @@ class Chain(Wrapper):
 		"""
 		for target in self.targets:
 			run_task(target, *args)
+			
+class Exc(Wrapper):
+	"""Throw error"""
+	def __call__(self, *args):
+		"""It just throw error"""
+		if self.targets:
+			raise Exception(*self.targets)
+		else:
+			raise
+	
+class Exit(Wrapper):
+	"""Exit"""
+	def __call__(self, *args):
+		"""It just exit"""
+		sys.exit(*self.targets)
 	
 # config object. Task runner will use this dict to expand format string.
 conf = {
