@@ -1,9 +1,9 @@
 from xcute import cute, Bump, Exc
 
 cute(
+	pkg_name = 'xcute',
 	test = 'readme_build',
 	bump_pre = 'test',
-	bump = Bump('xcute/__init__.py'),
 	bump_post = ['dist', 'release', 'publish', 'install'],
 	dist = 'python setup.py sdist bdist_wheel',
 	release = [
