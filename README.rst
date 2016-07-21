@@ -136,9 +136,10 @@ Format string
 
 pyXcute will expand format string with ``xcute.conf`` dictionary. Extend it as you need. By the default, it has following keys:
 
+* pkg_name - package name. This is supplied by "pkg_name" task. (i.e. ``cute(pkg_name=...)``)
 * date - ``datetime.datetime.now()``.
 * tty - a boolean shows if the output is a terminal.
-* version - version number. Only available after Bump task or Version task.
+* version - version number. Only available after Bump task or Version task. If you have supplied "pkg_name", PyXcute will try to extract version number from ``{pkg_name}/__init__.py``.
 * old_version - version number before bump. Only available after Bump task.
 * tasks - a dictionary. This is what you send to ``cute()``.
 * init - command name.
@@ -176,11 +177,23 @@ Here is the regex used by pyXcute:
 .. code:: python
 
 	"__version__ = ['\"]([^'\"]+)"
+	
+If you doesn't supply ``bump`` task and ``pkg_name`` exists, pyXcute will create a default bump task for you.
+
+.. code:: python
+
+	tasks["bump"] = Bump("{pkg_name}/__init__.py")
 
 xcute.Version
 ~~~~~~~~~~~~~
 
 This task will extract the version number into ``conf``.
+
+If ``pkg_name`` exists, pyXcute will try to extract version number from ``{pkg_name}/__init__.py`` at start and create a default ``version`` task.
+
+.. code:: python
+
+	tasks["version"] = Log("{version}")
 
 xcute.Exc
 ~~~~~~~~~
@@ -204,6 +217,11 @@ This task will exit the process.
 	
 Changelog
 ---------
+
+* 0.3.0 (Jul 21, 2016)
+
+  - Add ``pkg_name`` task.
+  - Add default tasks ``bump``, ``version``.
 
 * 0.2.0 (May 14, 2016)
 
