@@ -134,6 +134,17 @@ def cute(**tasks):
 	Define your tasks as keyword arguments just like setuptools.setup().
 	Export "tasks", which is a dict, to config."""
 	conf["tasks"] = tasks
+	
+	if "pkg_name" in tasks:
+		conf["pkg_name"] = tasks["pkg_name"]
+		del tasks["pkg_name"]
+		
+		if "bump" not in tasks:
+			tasks["bump"] = Bump("{pkg_name}/__init__.py")
+		
+		if "version" not in tasks:
+			tasks["version"] = Log("{version}")
+	
 	parse_arg(sys.argv[1:])
 	try:
 		run_main(conf["init"], conf["args"])
