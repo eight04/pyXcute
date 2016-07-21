@@ -139,6 +139,8 @@ def cute(**tasks):
 		conf["pkg_name"] = tasks["pkg_name"]
 		del tasks["pkg_name"]
 		
+		Version("{pkg_name}/__init__.py")()
+		
 		if "bump" not in tasks:
 			tasks["bump"] = Bump("{pkg_name}/__init__.py")
 		
