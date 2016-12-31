@@ -41,7 +41,9 @@ then run:
 	hello...
 	hello xcute!
 	
-If you didn't provide the command, it will try to execute ``default`` task.
+"hello" is the target to execute. If target is not provided, it will try to execute ``default`` task.
+	
+(If you get a "not a command" error, see `How do I make Python scripts executable? <https://docs.python.org/3/faq/windows.html#how-do-i-make-python-scripts-executable>`__)
 	
 Provide additional arguments:
 
