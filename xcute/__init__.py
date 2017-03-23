@@ -4,12 +4,13 @@ import sys
 import shlex
 import subprocess
 import pathlib
-import semver
 import traceback
-import itertools
+
+import semver
 
 from .util import Wrapper, conf, expand_conf, log
-from .version import Version, split_version, find_version_file
+from .version import Version # pylint: disable=unused-import
+from .version import split_version, find_version_file
 
 __version__ = "0.3.0"
 
@@ -39,7 +40,7 @@ class Bump(Wrapper):
 			left, old_version, right = split_version(file.read_text(encoding="utf-8"))
 			bump = getattr(semver, "bump_" + part, None)
 			conf["old_version"] = old_version
-			if bump:
+			if callable(bump):
 				version = bump(old_version)
 			else:
 				version = part
@@ -67,15 +68,14 @@ class Log(Wrapper):
 		
 class Chain(Wrapper):
 	"""Chain task runner"""
-	def __init__(self, *targets):
-		self.targets = list(itertools.chain(*targets))
 	def __call__(self, *args):
 		"""It chain tasks.
 
 		Note that the argument will be passed into EACH task.
 		"""
 		for target in self.targets:
-			run_task(target, *args)
+			for item in target:
+				run_task(item, *args)
 			
 class Exc(Wrapper):
 	"""Throw error"""
@@ -84,7 +84,7 @@ class Exc(Wrapper):
 		if self.targets:
 			raise Exception(*self.targets)
 		else:
-			raise
+			raise # pylint: disable=misplaced-bare-raise
 	
 class Exit(Wrapper):
 	"""Exit"""
@@ -117,7 +117,7 @@ def cute(**tasks):
 		# printing stack trace of process error doesn't help
 		print(err)
 		sys.exit(1)
-	except:
+	except Exception: # pylint: disable=broad-except
 		traceback.print_exc()
 		sys.exit(1)
 
@@ -140,7 +140,7 @@ def run_main(name, args):
 	run(name + "_pre")
 	try:
 		run(name, args)
-	except Exception:
+	except Exception: # pylint: disable=broad-except
 		if not run(name + "_err"):
 			raise
 	else:
@@ -148,7 +148,7 @@ def run_main(name, args):
 	finally:
 		run(name + "_fin")
 
-def run(name, args=[]):
+def run(name, args=None):
 	"""Run middleware. It converts task name into user task if possible."""
 	if name not in conf["tasks"]:
 		return False
@@ -159,7 +159,7 @@ def run(name, args=[]):
 	run_task(conf["tasks"][name], args)
 	return True
 	
-def run_task(task, args=[]):
+def run_task(task, args=()):
 	"""Run user task.
 
 	It handles non-callable user task and converts them into Chain, Task or
