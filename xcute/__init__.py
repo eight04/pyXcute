@@ -12,7 +12,7 @@ from .util import Wrapper, conf, expand_conf, log
 from .version import Version # pylint: disable=unused-import
 from .version import split_version, find_version_file
 
-__version__ = "0.3.0"
+__version__ = "0.3.1"
 
 class Cmd(Wrapper):
 	"""Command line runner"""	
