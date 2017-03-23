@@ -185,13 +185,16 @@ If you doesn't supply ``bump`` task and ``pkg_name`` exists, pyXcute will create
 .. code:: python
 
 	tasks["bump"] = Bump("{pkg_name}/__init__.py")
+  # or
+  tasks["bump"] = Bump("{pkg_name}/__pkginfo__.py")
+  # also see xcute.Version
 
 xcute.Version
 ~~~~~~~~~~~~~
 
 This task will extract the version number into ``conf``.
 
-If ``pkg_name`` exists, pyXcute will try to extract version number from ``{pkg_name}/__init__.py`` at start and create a default ``version`` task.
+If ``pkg_name`` exists, pyXcute will try to extract version number from ``{pkg_name}/__init__.py`` or ``{pkg_name}/__pkginfo__.py`` at start and create a default ``version`` task. If founded, the filename is used in default ``bump`` task.
 
 .. code:: python
 
@@ -219,6 +222,10 @@ This task will exit the process.
 	
 Changelog
 ---------
+
+* 0.3.1 (Mar 23, 2017)
+
+  - Find version from ``{pkg_name}/__pkginfo__.py``.
 
 * 0.3.0 (Jul 21, 2016)
 
