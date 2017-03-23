@@ -1,19 +1,17 @@
+#! python3
+
 import sys
-import datetime
 import shlex
 import subprocess
 import pathlib
 import semver
-import re
 import traceback
 import itertools
 
-__version__ = "0.3.0"
+from .util import Wrapper, conf, expand_conf, log
+from .version import Version, split_version, find_version_file
 
-class Wrapper:
-	"""A wrapper class that init targets"""
-	def __init__(self, *targets):
-		self.targets = targets
+__version__ = "0.3.0"
 
 class Cmd(Wrapper):
 	"""Command line runner"""	
@@ -61,18 +59,6 @@ class Task(Wrapper):
 		for target in self.targets:
 			run_main(target, args)
 		
-class Version(Wrapper):
-	"""Grab version"""
-	def __call__(self):
-		"""It will find version from target and export it to config.
-		[Expand format string]
-		
-		See split_version.
-		"""
-		target = pathlib.Path(expand_conf(self.targets[-1]))
-		text = target.read_text(encoding="utf-8")
-		conf["version"] = split_version(text)[1]
-		
 class Log(Wrapper):
 	"""A printer"""
 	def __call__(self):
@@ -106,42 +92,6 @@ class Exit(Wrapper):
 		"""It just exit"""
 		sys.exit(*self.targets)
 	
-# config object. Task runner will use this dict to expand format string.
-conf = {
-	"date": datetime.datetime.now(),
-	"tty": sys.stdout and sys.stdout.isatty()
-}
-
-def expand_conf(text):
-	"""Expand format string with config"""
-	return text.format_map(conf)
-
-def split_version(text):
-	"""Split text to (left, version_number, right)."""
-	match = re.search("__version__ = ['\"]([^'\"]+)", text)
-	i = match.start(1)
-	j = match.end(1)
-	return text[:i], text[i:j], text[j:]
-
-def log(*text):
-	"""Log text"""
-	if conf["tty"]:
-		print(*text)
-		
-def find_version():
-	"""Find version from following locations:
-	
-	{pkg_name}/__init__.py
-	{pkg_name}/__pkginfo__.py
-	"""
-	for file in ("__init__", "__pkginfo__"):
-		try:
-			Version("{{pkg_name}}/{}.py".format(file))()
-			return True
-		except (OSError, AttributeError):
-			pass
-	return False
-			
 def cute(**tasks):
 	"""Main entry point.
 
@@ -153,11 +103,10 @@ def cute(**tasks):
 		conf["pkg_name"] = tasks["pkg_name"]
 		del tasks["pkg_name"]
 		
-		find_version()
-		
-		if "bump" not in tasks:
-			tasks["bump"] = Bump("{pkg_name}/__init__.py")
-		
+		filename = find_version_file()
+		if filename and "bump" not in tasks:
+			tasks["bump"] = Bump("{{pkg_name}}/{}.py".format(filename))
+			
 		if "version" not in tasks:
 			tasks["version"] = Log("{version}")
 	
