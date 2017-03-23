@@ -159,7 +159,7 @@ def run(name, args=None):
 	run_task(conf["tasks"][name], args)
 	return True
 	
-def run_task(task, args=()):
+def run_task(task, args=None):
 	"""Run user task.
 
 	It handles non-callable user task and converts them into Chain, Task or
@@ -178,4 +178,7 @@ def run_task(task, args=()):
 
 	conf["task"] = task
 	
-	task(*args)
+	if args is not None:
+		task(*args)
+	else:
+		task()
