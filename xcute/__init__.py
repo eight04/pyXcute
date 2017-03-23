@@ -127,6 +127,20 @@ def log(*text):
 	"""Log text"""
 	if conf["tty"]:
 		print(*text)
+		
+def find_version():
+	"""Find version from following locations:
+	
+	{pkg_name}/__init__.py
+	{pkg_name}/__pkginfo__.py
+	"""
+	for file in ("__init__", "__pkginfo__"):
+		try:
+			Version("{{pkg_name}}/{}.py".format(file))()
+			return True
+		except (OSError, AttributeError):
+			pass
+	return False
 			
 def cute(**tasks):
 	"""Main entry point.
@@ -139,10 +153,7 @@ def cute(**tasks):
 		conf["pkg_name"] = tasks["pkg_name"]
 		del tasks["pkg_name"]
 		
-		try:
-			Version("{pkg_name}/__init__.py")()
-		except Exception:
-			pass
+		find_version()
 		
 		if "bump" not in tasks:
 			tasks["bump"] = Bump("{pkg_name}/__init__.py")
