@@ -100,7 +100,7 @@ or anything that is callable:
 	)
 
 Task chain
-~~~~~~~~~~
+----------
 	
 Define the workflow with ``_pre``, ``_err``, ``_post``, ``_fin`` suffix:
 
@@ -138,20 +138,38 @@ Format string
 
 pyXcute will expand format string with ``xcute.conf`` dictionary. Extend it as you need. By the default, it has following keys:
 
-* pkg_name - package name. This is supplied by "pkg_name" task. (i.e. ``cute(pkg_name=...)``)
+* pkg_name - package name. See pkg_name in `Special tasks`.
 * date - ``datetime.datetime.now()``.
 * tty - a boolean shows if the output is a terminal.
-* version - version number. Only available after Bump task or Version task. If you have supplied "pkg_name", PyXcute will try to extract version number from ``{pkg_name}/__init__.py``.
+* version - version number. Available after Bump task. Also see pkg_name section in `Special tasks`.
 * old_version - version number before bump. Only available after Bump task.
 * tasks - a dictionary. This is what you send to ``cute()``.
 * init - command name.
 * args - additional argument list.
 * name - the name of current task.
-	
+
+Special tasks
+~~~~~~~~~~~~~
+
+* pkg_name - when this key is found in tasks, the key is removed and inserted into the ``conf`` dictionary.
+
+  Then pyxcute would try to find version number from ``{pkg_name}/__init__.py``, ``{pkg_name}/__pkginfo__.py``. If found, the filename is added to ``conf["version_file"]``, and the version is added to ``conf["version"]``.
+  
+  The regex used to match version number is decribed at ``xcute.split_version``.
+  
+* version - if not provided, pyxcute uses ``"echo {version}" as default.
+* bump - if not provided, pyxcute uses ``Bump("{version_file}")`` as default.
+
 Live example
 ~~~~~~~~~~~~
 	
 Checkout `the cute file <https://github.com/eight04/pyXcute/blob/master/cute.py>`__ of pyXcute itself.
+
+API reference
+~~~~~~~~~~~~~
+
+xcute.cute
+``````````
 
 xcute.Bump
 ~~~~~~~~~~
@@ -188,17 +206,6 @@ If you doesn't supply ``bump`` task and ``pkg_name`` exists, pyXcute will create
   # or
   tasks["bump"] = Bump("{pkg_name}/__pkginfo__.py")
   # also see xcute.Version
-
-xcute.Version
-~~~~~~~~~~~~~
-
-This task will extract the version number into ``conf``.
-
-If ``pkg_name`` exists, pyXcute will try to extract version number from ``{pkg_name}/__init__.py`` or ``{pkg_name}/__pkginfo__.py`` at start and create a default ``version`` task. If founded, the filename is used in default ``bump`` task.
-
-.. code:: python
-
-	tasks["version"] = Log("{version}")
 
 xcute.Exc
 ~~~~~~~~~
