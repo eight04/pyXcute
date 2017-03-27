@@ -369,11 +369,11 @@ This task suppress exception.
 Changelog
 ---------
 
-* Next
+* 0.4.0 (Mar 28, 2017)
 
   - Switch to setup.cfg.
   - Add log, exc, noop, Throw, Try.
-  - *Drop Exc, Exit.*
+  - **Drop Exc, Exit.**
   - Add ``x-*`` utils.
 
 * 0.3.1 (Mar 23, 2017)
