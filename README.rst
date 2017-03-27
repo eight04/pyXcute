@@ -174,7 +174,7 @@ There are some CLI utils inspired by `npm-build-tools <https://www.npmjs.com/pac
 * x-copy
 * x-pipe
 
-Run each ``-h`` help screen to see the description.
+Run each command with ``-h`` to see the help message.
 
 Live example
 ------------

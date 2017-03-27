@@ -40,78 +40,77 @@ def iter_files(src, patterns, ignores=None, no_subdir=False, no_dir=False):
 
 	if not processed:
 		print("No file is matched.")
-
-def clean():
+		
+def base_parser(description):
 	from pathlib import Path
 	from argparse import ArgumentParser
-	from send2trash import send2trash
 	
-	parser = ArgumentParser(description="Delete folders and files.")
+	parser = ArgumentParser(description=description)
 	parser.add_argument(
 		"-s", dest="src", metavar="<src_dir>", default=".", type=Path,
 		help="Source directory.")
 	parser.add_argument(
+		"-i", dest="ignores", metavar="<pattern>", action="append",
+		help=
+			"Glob pattern matching files/folders to be ignored. This option "
+			"can be used multiple times.")
+	parser.add_argument(
 		"patterns", metavar="<pattern>", nargs="+",
 		help="Glob pattern matching files/folders.")
-	args = parser.parse_args()
+		
+	def files(**options):
+		yield from iter_files(parse().src, parse().patterns,
+			ignores=parse().ignores, **options)
+			
+	ARGS = None
+	def parse():
+		nonlocal ARGS
+		if not ARGS:
+			ARGS = parser.parse_args()
+		return ARGS
+		
+	return parser.add_argument, parse, files
+
+def clean():
+	from send2trash import send2trash
 	
-	for file in iter_files(args.src, args.patterns, no_subdir=True):
+	_add, _parse, files = base_parser("Delete folders and files recursively.")
+	
+	for file in files(no_subdir=True):
 		print("delete", file)
 		send2trash(str(file))
 	
 def concat():
-	from argparse import ArgumentParser
-	from pathlib import Path
-	
-	parser = ArgumentParser(
-		description="Concat files and print to stdout. Each file is only"
-			" printed once.")
-	parser.add_argument(
-		"-s", dest="src", metavar="<src_dir>", default=".", type=Path,
-		help="Source directory.")
-	parser.add_argument(
-		"patterns", metavar="<pattern>", nargs="+",
-		help="Glob pattern matching files/folders.")
-	parser.add_argument(
-		"-i", dest="ignores", metavar="<pattern>", nargs="+",
-		help="Glob pattern matching files/folders to be ignored.")
-	parser.add_argument(
-		"-n", dest="end", action="store_const", const="", default="\n",
+	add, parse, files = base_parser(
+		"Concat files and print to stdout. Each file is only "
+		"printed once.")
+		
+	add("-n", dest="end", action="store_const", const="", default="\n",
 		help="Don't print line end after each file.")
-	args = parser.parse_args()
+		
+	args = parse()
 	
-	for file in iter_files(args.src, args.patterns, ignores=args.ignores,
-			no_dir=True):
+	for file in files(no_dir=True):
 		print(file.read_text("utf-8"), end=args.end)
 	
 def copy():
-	from argparse import ArgumentParser
 	from pathlib import Path
-	
-	parser = ArgumentParser(
-		description="Copy files. Note that a if pattern matches a folder, the"
-			" folder is ignored. Use **/* to copy folder's content.")
-	parser.add_argument(
-		"-s", dest="src", metavar="<src_dir>", default=".", type=Path,
-		help="Source directory.")
-	parser.add_argument(
-		"-i", dest="ignores", metavar="<pattern>", nargs="+",
-		help="Glob pattern matching files/folders to be ignored.")
-	parser.add_argument(
-		"dest", metavar="<dest_dir>", type=Path, help="Destination directory.")
-	parser.add_argument(
-		"patterns", metavar="<pattern>", nargs="+",
-		help="Glob pattern matching files/folders.")
-	args = parser.parse_args()
-	
 	from shutil import copy2
 	from os import makedirs
 	
+	add, parse, files = base_parser(
+		"Copy files. Note that if pattern matches a folder, the"
+		" folder is ignored. Use **/* to match folder's content.\n\n"
+		"Missing folders are automatically created.")
+		
+	add("dest", metavar="<dest_dir>", type=Path, help="Destination directory.")
+	
+	args = parse()
+	
 	created_parents = set()
-	for file in iter_files(args.src, args.patterns, ignores=args.ignores,
-			no_dir=True):
+	for file in files(no_dir=True):
 		new_file = args.dest / file.relative_to(args.src)
-		print("copy", file)
+		print("copy", file, "to", new_file)
 		if new_file.parent not in created_parents:
 			makedirs(new_file.parent, exist_ok=True)
 			created_parents.add(new_file.parent)
@@ -120,17 +119,16 @@ def copy():
 def pipe():
 	from argparse import ArgumentParser
 	from pathlib import Path
+	from sys import stdin
 
 	parser = ArgumentParser(
-		description="Read stdin and output to a file. It automatically creates"
-			" missing folders.")
+		description="Read stdin and output to a file. Missing folders are "
+			"automatically created.")
 	parser.add_argument(
 		"dest", metavar="<dest_file>", type=Path,
 		help="Destination file.")
 	args = parser.parse_args()
 		
-	import sys
-	
 	with args.dest.open("w") as f:
-		for line in sys.stdin:
+		for line in stdin:
 			f.write(line)
