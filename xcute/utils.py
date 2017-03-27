@@ -120,6 +120,7 @@ def pipe():
 	from argparse import ArgumentParser
 	from pathlib import Path
 	from sys import stdin
+	from os import makedirs
 
 	parser = ArgumentParser(
 		description="Read stdin and output to a file. Missing folders are "
@@ -129,6 +130,7 @@ def pipe():
 		help="Destination file.")
 	args = parser.parse_args()
 		
+	makedirs(args.dest.parent, exist_ok=True)
 	with args.dest.open("w") as f:
 		for line in stdin:
 			f.write(line)
