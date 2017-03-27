@@ -1,31 +1,84 @@
 #! python3
 
+from contextlib import contextmanager
+import datetime
+from inspect import isclass
+import re
+import pathlib
 import sys
 import shlex
 import subprocess
-import pathlib
 import traceback
 
 import semver
 
-from .util import Wrapper, conf, expand_conf, log
-from .version import Version # pylint: disable=unused-import
-from .version import split_version, find_version_file
+from .__pkginfo__ import __version__
 
-__version__ = "0.3.1"
+# config object. Task runner will use this dict to expand format string.
+conf = {
+	"date": datetime.datetime.now(),
+	"tty": bool(sys.stdout and sys.stdout.isatty())
+}
 
-class Cmd(Wrapper):
-	"""Command line runner"""	
+def f(text): # pylint: disable=invalid-name
+	"""format string."""
+	return text.format_map(conf)
+
+def version_from_file(file):
+	"""Extract version from file"""
+	text = pathlib.Path(file).read_text(encoding="utf-8")
+	return split_version(text)[1]
+		
+def split_version(text):
+	"""Split text to (left, version_number, right)."""
+	match = re.search("__version__ = ['\"]([^'\"]+)", text)
+	i = match.start(1)
+	j = match.end(1)
+	return text[:i], text[i:j], text[j:]
+
+def find_version_file():
+	"""Extract version, version_file to conf"""
+	if "pkg_name" not in conf:
+		return
+		
+	for file in ("__init__", "__pkginfo__"):
+		filename = "{}/{}.py".format(conf["pkg_name"], file)
+		try:
+			conf["version"] = version_from_file(filename)
+			conf["version_file"] = filename
+		except (OSError, AttributeError):
+			pass
+			
+def log(*items):
+	if conf["tty"]:
+		print(*items)
+		
+def exc(message=None):
+	"""Raise exception. If message is None, reraise last exception."""
+	if message is None:
+		raise # pylint: disable=misplaced-bare-raise
+	raise Exception(message)
+	
+def noop(*args, **kwargs):
+	"""A noop"""
+	pass
+
+class Cmd:
+	"""Command line runner"""
+	def __init__(self, *cmds):
+		self.cmds = cmds
+		
 	def __call__(self, *args):
-		"""Arguments will be appended to each command. [Expand format string]
-		"""
-		for target in self.targets:
-			target = expand_conf(target)
-			args = shlex.split(target) + list(args)
+		"""args are appended to each command."""
+		for cmd in self.cmds:
+			args = shlex.split(f(cmd)) + list(args)
 			subprocess.run(args, shell=True, check=True)
 		
-class Bump(Wrapper):
+class Bump:
 	"""Bump version runner"""
+	def __init__(self, file):
+		self.file = file
+		
 	def __call__(self, part="patch"):
 		"""Bump version number. [Expand format string]
 
@@ -34,64 +87,84 @@ class Bump(Wrapper):
 		
 		See semver.bump_X for valid arguments.
 		"""
-		for file in self.targets:
-			file = pathlib.Path(expand_conf(file))
-			conf["file"] = file
-			left, old_version, right = split_version(file.read_text(encoding="utf-8"))
-			bump = getattr(semver, "bump_" + part, None)
-			conf["old_version"] = old_version
-			if callable(bump):
-				version = bump(old_version)
-			else:
-				version = part
-				semver.parse(version)
-			conf["version"] = version
-			file.write_text(left + version + right, encoding="utf-8")
-			log("Bump {file} from {old_version} to {version}".format(
-				file=file,
-				old_version=old_version,
-				version=version
-			))
+		file = pathlib.Path(f(self.file))
+		conf["file"] = file
+		left, old_version, right = split_version(file.read_text(encoding="utf-8"))
+		bump = getattr(semver, "bump_" + part, None)
+		conf["old_version"] = old_version
+		if callable(bump):
+			version = bump(old_version)
+		else:
+			version = part
+			semver.parse(version)
+		conf["version"] = version
+		file.write_text(left + version + right, encoding="utf-8")
+		log("Bump {file} from {old_version} to {version}".format(
+			file=file,
+			old_version=old_version,
+			version=version
+		))
 			
-class Task(Wrapper):
-	"""User task runner"""
+class Task:
+	"""Run conf["tasks"][name]"""
+	def __init__(self, name):
+		self.name = name
+		
 	def __call__(self, *args):
-		"""It treat each target as task name and execute it"""
-		for target in self.targets:
-			run_main(target, args)
+		run(self.name, *args)
 		
-class Log(Wrapper):
+class Log:
 	"""A printer"""
-	def __call__(self):
-		"""It print things. [Expand format string]"""
-		print(*map(expand_conf, self.targets))
+	def __init__(self, *items):
+		self.items = items
 		
-class Chain(Wrapper):
+	def __call__(self):
+		for item in self.items:
+			if isinstance(item, str):
+				item = f(item)
+			log(item)
+		
+class Chain:
 	"""Chain task runner"""
+	def __init__(self, *task_lists):
+		self.task_lists = task_lists
+		
 	def __call__(self, *args):
 		"""It chain tasks.
 
 		Note that the argument will be passed into EACH task.
 		"""
-		for target in self.targets:
-			for item in target:
+		for list in self.task_lists:
+			for item in list:
 				run_task(item, *args)
-			
-class Exc(Wrapper):
+				
+class Throw:
 	"""Throw error"""
-	def __call__(self, *args):
-		"""It just throw error"""
-		if self.targets:
-			raise Exception(*self.targets)
+	def __init__(self, exc=None, message=None):
+		self.exc = exc
+		self.message = message
+		
+	def __call__(self):
+		if isclass(self.exc):
+			err = self.exc(self.message)
 		else:
-			raise # pylint: disable=misplaced-bare-raise
-	
-class Exit(Wrapper):
-	"""Exit"""
+			err = self.exc
+		if err:
+			raise err
+		raise # pylint: disable=misplaced-bare-raise
+			
+class Try:
+	"""Suppress error"""
+	def __init__(self, *tasks):
+		self.tasks = tasks
+		
 	def __call__(self, *args):
-		"""It just exit"""
-		sys.exit(*self.targets)
-	
+		for task in self.tasks:
+			try:
+				run_task(task, *args)
+			except Exception as err: # pylint: disable=broad-except
+				log(err)
+
 def cute(**tasks):
 	"""Main entry point.
 
@@ -103,33 +176,37 @@ def cute(**tasks):
 		conf["pkg_name"] = tasks["pkg_name"]
 		del tasks["pkg_name"]
 		
-		filename = find_version_file()
-		if filename and "bump" not in tasks:
-			tasks["bump"] = Bump("{{pkg_name}}/{}.py".format(filename))
-			
-		if "version" not in tasks:
-			tasks["version"] = Log("{version}")
+	find_version_file()
 	
-	parse_arg(sys.argv[1:])
+	if "bump" not in tasks:
+		tasks["bump"] = Bump("{pkg_name}/{version_file}.py")
+		
+	if "version" not in tasks:
+		tasks["version"] = Log("{version}")
+	
+	task_name, *args = parse_args()
+	
 	try:
-		run_main(conf["init"], conf["args"])
+		run(task_name, *args)
 	except subprocess.CalledProcessError as err:
 		# printing stack trace of process error doesn't help
-		print(err)
-		sys.exit(1)
+		log(err)
+		exit(1)
 	except Exception: # pylint: disable=broad-except
 		traceback.print_exc()
-		sys.exit(1)
-
-def parse_arg(arg):
+		exit(1)
+	
+def parse_args(args=None):
 	"""Parse sys.argv. Export "init", "args" to config."""
-	if len(arg) < 1:
-		conf["init"] = "default"
-	else:
-		conf["init"] = arg[0]
-	conf["args"] = arg[1:]
+	if args is None:
+		args = sys.argv[1:]
+		
+	if args:
+		return args
+		
+	return ("default",)
 
-def run_main(name, args):
+def run(name, *args):
 	"""Run task with specific name.
 
 	This function handles _pre, _err, _post suffix.
@@ -137,48 +214,94 @@ def run_main(name, args):
 	if name not in conf["tasks"]:
 		raise Exception("Cannot find {name!r} in the cute file".format(name=name))
 		
-	run(name + "_pre")
+	do_run(name + "_pre")
 	try:
-		run(name, args)
+		do_run(name, *args)
 	except Exception: # pylint: disable=broad-except
-		if not run(name + "_err"):
+		if not do_run(name + "_err"):
 			raise
 	else:
-		run(name + "_post")
+		do_run(name + "_post")
 	finally:
-		run(name + "_fin")
+		do_run(name + "_fin")
+		
+def iterable(obj):
+	try:
+		iter(obj)
+	except TypeError:
+		return False
+	return True
+		
+@contextmanager
+def enter_task(name):
+	curr_task = conf.get("curr_task")
+	conf["curr_task"] = name
+	log("{}...".format(name))
+	yield
+	conf["curr_task"] = curr_task
 
-def run(name, args=None):
+def do_run(name, *args):
 	"""Run middleware. It converts task name into user task if possible."""
-	if name not in conf["tasks"]:
+	task = conf["tasks"].get(name)
+	if not task:
 		return False
 		
-	conf["name"] = name
-	log("{name}...".format(name=name))
+	with enter_task(name):
+		run_task(task, *args)
 		
-	run_task(conf["tasks"][name], args)
 	return True
 	
-def run_task(task, args=None):
+class Transformer:
+	def __init__(self):
+		self.matchers = []
+		
+	def add(self, convert):
+		def wrapped(match):
+			self.matchers.append((match, convert))
+			return match
+		return wrapped
+		
+	def transform(self, item):
+		for match, convert in self.matchers:
+			if match(item):
+				return convert(item)
+		return item
+	
+def run_task(task, *args):
 	"""Run user task.
 
 	It handles non-callable user task and converts them into Chain, Task or
 	Cmd.
 	"""
-	if not callable(task):
-		if isinstance(task, list):
-			task = Chain(task)
-		elif task in conf["tasks"]:
-			task = Task(task)
-		else:
-			task = Cmd(task)
+	task = t.transform(task)
 		
 	if not callable(task):
 		raise Exception("{task!r} is not callable".format(task=task))
 
-	conf["task"] = task
+	task(*args)
 	
-	if args is not None:
-		task(*args)
-	else:
-		task()
+t = Transformer()
+
+@t.add(Task)
+def _(task):
+	return isinstance(task, str) and task in conf.get("tasks", ())
+
+@t.add(Cmd)
+def _(task):
+	return isinstance(task, str)
+	
+@t.add(Chain)
+def _(task):
+	try:
+		iter(task)
+	except TypeError:
+		return False
+	return True
+	
+@t.add(Throw)
+def _(task):
+	if isinstance(task, BaseException):
+		return True
+	if isclass(task) and issubclass(task, BaseException):
+		return True
+	return False
