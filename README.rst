@@ -160,6 +160,18 @@ pyXcute expands format string with `xcute.conf`_ dictionary when the task is exe
   hello_pre...
   hello...
   hello bad world
+  
+Cross-platform utils
+--------------------
+
+There are some CLI utils inspired by `npm-build-tools <https://www.npmjs.com/package/npm-build-tools>`_, including:
+
+* x-clean
+* x-cat
+* x-copy
+* x-pipe
+
+Run each ``-h`` help screen to see the description.
 
 Live example
 ------------
