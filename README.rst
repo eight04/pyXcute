@@ -366,6 +366,13 @@ This task suppress exception.
 Changelog
 ---------
 
+* Next
+
+  - Switch to setup.cfg.
+  - Add log, exc, noop, Throw, Try.
+  - *Drop Exc, Exit.*
+  - Add ``x-*`` utils.
+
 * 0.3.1 (Mar 23, 2017)
 
   - Find version from ``{pkg_name}/__pkginfo__.py``.
