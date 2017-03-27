@@ -1,7 +1,17 @@
 #! python3
 
-def iter_files(src, patterns, ignores=None, ordered_patterns=False,
-		no_subdir=False, no_dir=False):
+def iter_files(src, patterns, ignores=None, no_subdir=False, no_dir=False):
+	"""Iter through files/folders matching glob patterns.
+	
+	:arg Path src: Source directory.
+	:arg list[str] patterns: Glob patterns.
+	:arg list[str] ignores: Glob patterns. Ignore matched files/folders.
+	
+	:arg bool no_subdir: If a and b are matched and a in b.parents, ignore b.
+		This option doesn't keep the file order with patterns.
+		
+	:arg bool no_dir: Ignore folders.
+	"""
 		
 	from ordered_set import OrderedSet
 	from natsort import natsorted
@@ -21,12 +31,12 @@ def iter_files(src, patterns, ignores=None, ordered_patterns=False,
 			processed.add(file)
 			yield file
 			
-	if ordered_patterns:
-		# remain pattern's order
+	if no_subdir:
+		# no_subdir doesn't keep patterns' order
+		yield from _iter_files((f for p in patterns for f in src.glob(p)))
+	else:
 		for pattern in patterns:
 			yield from _iter_files(src.glob(pattern))
-	else:
-		yield from _iter_files((f for p in patterns for f in src.glob(p)))
 
 	if not processed:
 		print("No file is matched.")
@@ -71,7 +81,7 @@ def concat():
 	args = parser.parse_args()
 	
 	for file in iter_files(args.src, args.patterns, ignores=args.ignores,
-			ordered_patterns=True, no_dir=True):
+			no_dir=True):
 		print(file.read_text("utf-8"), end=args.end)
 	
 def copy():
