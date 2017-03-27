@@ -1,10 +1,14 @@
-from xcute import cute, Exc
+#! python3
+
+from xcute import cute, exc
 
 cute(
 	pkg_name = 'xcute',
-	test = ['pylint xcute cute setup', 'readme_build'],
+	lint = 'pylint xcute cute setup',
+	test = ['lint', 'readme_build'],
 	bump_pre = 'test',
-	bump_post = ['dist', 'release', 'publish', 'install'],
+	bump_post = ['clean', 'dist', 'release', 'publish', 'install'],
+	clean = 'x-clean build dist',
 	dist = 'python setup.py sdist bdist_wheel',
 	release = [
 		'git add .',
@@ -12,17 +16,16 @@ cute(
 		'git tag -a v{version} -m "Release v{version}"'
 	],
 	publish = [
-		'twine upload dist/*{version}*',
+		'twine upload dist/*',
 		'git push --follow-tags'
 	],
 	install = 'pip install -e .',
 	install_err = 'elevate -c -w pip install -e .',
-	readme_build = 
-		'python setup.py --long-description > build/long-description.rst && '
-		'rst2html --no-raw --exit-status=1 --verbose '
-		'build/long-description.rst build/long-description.html',
-	readme_build_err = ['readme_show', Exc()],
-	readme_show = 'start build/long-description.html',
-	readme = 'readme_build',
-	readme_post = 'readme_show'
+	readme = 'rstpreview README.rst',
+	readme_build = [
+		'python setup.py --long-description | x-pipe build/ld',
+		'rst2html --no-raw --exit-status=2 -r 2 build/ld build/ld.html'
+	],
+	readme_build_err = ['readme_show', exc],
+	readme_show = 'start build/ld.html'
 )
