@@ -179,7 +179,7 @@ def cute(**tasks):
 	find_version_file()
 	
 	if "bump" not in tasks:
-		tasks["bump"] = Bump("{pkg_name}/{version_file}.py")
+		tasks["bump"] = Bump("{version_file}")
 		
 	if "version" not in tasks:
 		tasks["version"] = Log("{version}")
