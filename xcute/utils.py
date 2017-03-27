@@ -74,7 +74,7 @@ def base_parser(description):
 def clean():
 	from send2trash import send2trash
 	
-	_add, _parse, files = base_parser("Delete folders and files recursively.")
+	_add, _parse, files = base_parser("Send folders and files to trash.")
 	
 	for file in files(no_subdir=True):
 		print("delete", file)
