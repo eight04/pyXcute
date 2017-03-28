@@ -12,6 +12,7 @@ Features
 * Use it like setuptools.
 * Chain tasks with ``_pre``, ``_err``, ``_post``, ``_fin`` suffix.
 * A builtin Bump task which can bump version with `semver <https://github.com/k-bx/python-semver>`_.
+* A small set of cross-platform CLI utils.
 
 Install
 -------
