@@ -372,6 +372,7 @@ Changelog
 
 * 0.4.1 (Apr 3, 2017)
 
+  - Better description for x-clean.
   - Fix broken pipe error in x-pipe.
 
 * 0.4.0 (Mar 28, 2017)
