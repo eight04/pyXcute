@@ -131,6 +131,6 @@ def pipe():
 	args = parser.parse_args()
 		
 	makedirs(args.dest.parent, exist_ok=True)
-	with args.dest.open("w") as f:
-		for line in stdin:
+	with args.dest.open("wb") as f:
+		for line in stdin.buffer:
 			f.write(line)
