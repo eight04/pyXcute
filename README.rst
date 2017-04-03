@@ -370,6 +370,10 @@ This task suppress exception.
 Changelog
 ---------
 
+* 0.4.1 (Apr 3, 2017)
+
+  - Fix broken pipe error in x-pipe.
+
 * 0.4.0 (Mar 28, 2017)
 
   - Switch to setup.cfg.
