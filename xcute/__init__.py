@@ -1,10 +1,15 @@
 #! python3
 
+from __future__ import print_function
+
 from contextlib import contextmanager
 import datetime
 from inspect import isclass
 import re
-import pathlib
+try:
+	import pathlib2 as pathlib
+except ImportError:
+	import pathlib
 import sys
 import shlex
 import subprocess
@@ -184,7 +189,9 @@ def cute(**tasks):
 	if "version" not in tasks:
 		tasks["version"] = Log("{version}")
 	
-	task_name, *args = parse_args()
+	args = parse_args()
+	task_name = args[0]
+	args = args[1:]
 	
 	try:
 		run(task_name, *args)
