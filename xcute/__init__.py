@@ -2,6 +2,8 @@
 
 from __future__ import print_function
 
+from .__pkginfo__ import __version__
+
 from contextlib import contextmanager
 import datetime
 from inspect import isclass
@@ -14,10 +16,6 @@ import sys
 import shlex
 import subprocess
 import traceback
-
-import semver
-
-from .__pkginfo__ import __version__
 
 # config object. Task runner will use this dict to expand format string.
 conf = {
@@ -77,6 +75,7 @@ class Cmd:
 		"""args are appended to each command."""
 		for cmd in self.cmds:
 			args = shlex.split(f(cmd)) + list(args)
+			log("> Cmd: {}".format(" ".join(args)))
 			subprocess.run(args, shell=True, check=True)
 		
 class Bump:
@@ -92,6 +91,8 @@ class Bump:
 		
 		See semver.bump_X for valid arguments.
 		"""
+		import semver
+
 		file = pathlib.Path(f(self.file))
 		conf["file"] = file
 		left, old_version, right = split_version(file.read_text(encoding="utf-8"))
@@ -243,7 +244,7 @@ def iterable(obj):
 def enter_task(name):
 	curr_task = conf.get("curr_task")
 	conf["curr_task"] = name
-	log("{}...".format(name))
+	log("> Task: {}".format(name))
 	yield
 	conf["curr_task"] = curr_task
 
