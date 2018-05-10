@@ -122,10 +122,6 @@ def exc(message=None):
         raise # pylint: disable=misplaced-bare-raise
     raise Exception(message)
     
-def noop(*args, **kwargs):
-    """A noop"""
-    pass
-
 class Cmd:
     """Command line runner"""
     def __init__(self, *cmds):
