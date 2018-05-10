@@ -92,6 +92,16 @@ Use a list:
 	cute(
 		hello = ['echo task1', 'echo task2']
 	)
+  
+An Exception would make the task fail:
+
+.. code:: python
+
+  from xcute import cute
+  cute(
+    hello = Exception, # re-raise last exception if the task is an Exception class
+    hello2 = Exception("message") # raise the exception if it is an instance
+  )
 	
 Or anything that is callable:
 
@@ -103,7 +113,7 @@ Or anything that is callable:
 		hello = lambda: print('say hello')
 	)
   
-Actually, when you assign a non-callable as a task, pyxcute converts it into a callable according to its type. See `xcute.Cmd`_, `xcute.Chain`_, `xcute.Throw`_., and `xcute.Task`_
+Actually, when you assign a non-callable value as a task, pyxcute converts it into a callable according to its type. See `xcute.Cmd`_, `xcute.Chain`_, `xcute.Throw`_., and `xcute.Task`_
 
 Task chain
 ~~~~~~~~~~
@@ -185,39 +195,6 @@ Checkout `the cute file <https://github.com/eight04/pyXcute/blob/master/cute.py>
 API reference
 -------------
 
-xcute.conf
-~~~~~~~~~~
-
-A dictionary used to format string. By the default, it has following keys:
-
-* pkg_name - package name. See `xcute.cute`_.
-* date - ``datetime.datetime.now()``.
-* tty - a boolean shows if the output is a terminal.
-* version - version number. Available after Bump task. Also see pkg_name section in `xcute.cute`_.
-* old_version - version number before bump. Only available after Bump task.
-* tasks - a dictionary. This is what you send to ``cute()``.
-* curr_task - str. The name of current task.
-
-xcute.cute
-~~~~~~~~~~
-
-.. code:: python
-
-  cute(**tasks)
-
-The entry point.
-
-Here are some special tasks:
-
-* pkg_name - when this key is found in tasks, the key is removed and inserted into the ``conf`` dictionary.
-
-  Then, ``cute()`` tries to find version number from ``{pkg_name}/__init__.py``, ``{pkg_name}/__pkginfo__.py``. If found, the filename is added to ``conf["version_file"]``, and the version is added to ``conf["version"]``.
-  
-  The regex used to match version number is decribed at ``xcute.split_version``.
-  
-* version - if not provided, pyxcute uses ``Log("{version}")`` as default.
-* bump - if not provided, pyxcute uses ``Bump("{version_file}")`` as default.
-
 xcute.exc
 ~~~~~~~~~
 
@@ -235,15 +212,6 @@ Raise an exception. It reraises the last error if message is not provided.
     ...
     task_err = ["handle error...", exc]
   )
-
-xcute.f
-~~~~~~~
-
-.. code:: python
-
-  f(string)
-  
-Expand string with xcute.conf dictionary.
 
 xcute.log
 ~~~~~~~~~

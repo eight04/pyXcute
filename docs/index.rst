@@ -1,4 +1,4 @@
-.. currentmodule:: apng
+.. currentmodule:: xcute
 
 pyXcute API reference
 =====================
@@ -7,21 +7,19 @@ A small task runner inspired by npm scripts.
 
 Usage/examples can be founded in `README <https://github.com/eight04/pyXcute>`_.
 
+Constants
+---------
+
+.. autodata:: conf
+  :annotation: = dict()
+
 Functions
 ---------
 
-.. autofunction:: parse_chunks
+.. autofunction:: cute
 
-.. autofunction:: make_chunk
+.. autofunction:: f
 
-Classes
--------
+.. autofunction:: log
 
-.. autoclass:: PNG
-  :members: open, open_any, from_bytes, to_bytes, save
-
-.. autoclass:: FrameControl
-  :members: from_bytes, to_bytes
-
-.. autoclass:: APNG
-  :members: open, append, append_file, from_bytes, to_bytes, from_files, save
+.. autofunction:: split_version
