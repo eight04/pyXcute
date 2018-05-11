@@ -173,8 +173,12 @@ class Bump:
             number to ``part``.
             
         It uses :func:`split_version` to find the version. After bumping, it
-        would assign the old version to ``conf["old_version"]`` and the new
-        version to ``conf["version"]``.
+        would:
+
+        1. Assign the old version to ``conf["old_version"]``
+        2. Assign the new version to ``conf["version"]``
+        3. Try to find the version number inside ``setup.cfg`` and update to
+          the new version.
         """
         import semver
 
@@ -204,6 +208,7 @@ class Bump:
             return
         new_cfg_content = cfg_content[:match.start(1)] + version + cfg_content[match.end(1):]
         cfg.write_text(new_cfg_content, encoding="utf-8")
+        log("Update the version number inside setup.cfg")
             
 class Task:
     """Run conf["tasks"][name]"""
