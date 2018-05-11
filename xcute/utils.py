@@ -66,8 +66,7 @@ def base_parser(description):
         
     def files(**options):
         for file in iter_files(
-            parse().src, parse().patterns, ignores=parse().ignores, **options
-        ):
+                parse().src, parse().patterns, ignores=parse().ignores, **options):
             yield file
             
     class NS:

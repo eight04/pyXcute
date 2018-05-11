@@ -1,6 +1,8 @@
 #! python3
 
-from xcute import cute
+import sys
+
+from xcute import cute, Skip
 
 def readme():
     """Live reload readme"""
@@ -12,7 +14,7 @@ def readme():
 cute(
     pkg_name = 'xcute',
     lint = 'pylint xcute cute setup',
-    test = ['lint', 'readme_build'],
+    test = [Skip("lint", sys.version_info[:2] != (3, 6)), 'readme_build'],
     bump_pre = 'test',
     bump_post = ['clean', 'dist', 'release', 'publish', 'install'],
     clean = 'x-clean build dist',

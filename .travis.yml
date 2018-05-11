@@ -5,4 +5,4 @@ python:
   - "3.6"
 script:
   - pip install -e .
-  - cute travis
+  - python cute.py test

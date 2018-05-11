@@ -57,7 +57,7 @@ def f(text):
         hello = "echo Current time is {date}"
       )
     """
-    return text.format_map(conf)
+    return text.format(**conf)
 
 def version_from_file(file):
     """Extract the version number from a file.
