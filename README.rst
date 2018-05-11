@@ -216,6 +216,10 @@ http://pyxcute.readthedocs.io/en/latest/
 Changelog
 ---------
 
+* 0.5.1 (May 12, 2018)
+
+  - Add: ``conf["py"]`` variable.
+
 * 0.5.0 (May 11, 2018)
 
   - Add: support Python 2.
