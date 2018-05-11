@@ -449,6 +449,8 @@ def run_task(task, *args):
     """
     task = task_converter.transform(task)
         
+    if task is None:
+        return
     if not callable(task):
         raise Exception("{task!r} is not callable".format(task=task))
 
