@@ -153,7 +153,7 @@ class Cmd:
         for cmd in self.cmds:
             args = shlex.split(f(cmd)) + list(args)
             log("> Cmd: {}".format(" ".join(args)))
-            subprocess.run(args, shell=sys.platform == "win32", check=True)
+            subprocess.run(subprocess.list2cmdline(args), shell=True, check=True)
         
 class Bump:
     """An executor which can bump the version inside a .py file."""
