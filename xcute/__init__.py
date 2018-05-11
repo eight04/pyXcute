@@ -20,30 +20,6 @@ import traceback
 
 __version__ = "0.5.0"
 
-# config object. Task runner will use this dict to expand format string.
-conf = {
-    "date": datetime.datetime.now(),
-    "tty": bool(sys.stdout and sys.stdout.isatty())
-}
-"""A dictionary that is used across all tasks. It has 2 purpoeses: 
-
-1. A convenience way to share variables between your ``cute.py`` file and 
-  ``xcute`` module.
-2. The context for string formatting. See :func:`f`.
-
-By default, it has following keys:
-
-* ``pkg_name``: The ``pkg_name`` specified by the user in :func:`cute`.
-* ``date``: Equals to ``datetime.datetime.now()``.
-* ``tty``: ``bool``. ``True`` if the output is a terminal.
-* ``version``: ``str``. A version number. Also see :func:`cute`.
-* ``old_version``: ``str``. A version number. Only available after
-  :class:`Bump` task.
-* ``tasks``: ``dict``. This is what you send to :func:`cute`.
-* ``curr_task``: ``str``. The name of the current task.
-"""
-
-
 def f(text):
     """Format the string with :const:`conf`.
     
@@ -124,6 +100,16 @@ def exc(message=None):
     if message is None:
         raise # pylint: disable=misplaced-bare-raise
     raise Exception(message)
+    
+class Py:
+    """Cross platform py command."""
+    def __format__(self, spec):
+        """If on Windows, it converts "{py:2.7}" into "py -2.7", otherwise to
+        "python2.7".
+        """
+        if sys.platform == "win32":
+            return "py -{}".format(spec)
+        return "python{}".format(spec)
     
 class Cmd:
     """Shell command executor."""
@@ -541,6 +527,29 @@ def run_task(task, *args):
 
     task(*args)
     
+conf = {
+    "date": datetime.datetime.now(),
+    "tty": bool(sys.stdout and sys.stdout.isatty()),
+    "py": Py()
+}
+"""A dictionary that is used across all tasks. It has 2 purpoeses: 
+
+1. A convenience way to share variables between your ``cute.py`` file and 
+  ``xcute`` module.
+2. The context for string formatting. See :func:`f`.
+
+By default, it has following keys:
+
+* ``pkg_name``: The ``pkg_name`` specified by the user in :func:`cute`.
+* ``date``: Equals to ``datetime.datetime.now()``.
+* ``tty``: ``bool``. ``True`` if the output is a terminal.
+* ``version``: ``str``. A version number. Also see :func:`cute`.
+* ``old_version``: ``str``. A version number. Only available after
+  :class:`Bump` task.
+* ``tasks``: ``dict``. This is what you send to :func:`cute`.
+* ``curr_task``: ``str``. The name of the current task.
+"""
+
 task_converter = TaskConverter()
 """The task converter used by pyXcute.
 
