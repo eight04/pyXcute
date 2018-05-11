@@ -54,7 +54,7 @@ then run:
 	
 ..
   
-  If you get a "not a command" error, see `How do I make Python scripts executable? <https://docs.python.org/3/faq/windows.html#how-do-i-make-python-scripts-executable>`_)
+  If you got a "not a command" error, see `How do I make Python scripts executable? <https://docs.python.org/3/faq/windows.html#how-do-i-make-python-scripts-executable>`_)
 
 "hello" is the name of the task that should be executed. If ``cute.py`` is executed without a task name, it will run the "default" task.
 	
