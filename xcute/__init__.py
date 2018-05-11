@@ -94,7 +94,7 @@ def find_version_file():
         try:
             conf["version"] = version_from_file(filename)
             conf["version_file"] = filename
-        except (OSError, AttributeError):
+        except (IOError, AttributeError):
             pass
             
 def log(*items):
