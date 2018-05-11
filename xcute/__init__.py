@@ -108,7 +108,9 @@ class Py:
         "python2.7".
         """
         if sys.platform == "win32":
-            return "py -{}".format(spec)
+            if spec:
+                return "py -{}".format(spec)
+            return "py"
         return "python{}".format(spec)
     
 class Cmd:
@@ -163,8 +165,8 @@ class Bump:
 
         1. Assign the old version to ``conf["old_version"]``
         2. Assign the new version to ``conf["version"]``
-        3. Try to find the version number inside ``setup.cfg`` and update to
-          the new version.
+        3. Try to find the version number inside ``setup.cfg`` and update it to
+           the new version.
         """
         import semver
 
@@ -540,14 +542,27 @@ conf = {
 
 By default, it has following keys:
 
-* ``pkg_name``: The ``pkg_name`` specified by the user in :func:`cute`.
+* ``curr_task``: ``str``. The name of the current task.
 * ``date``: Equals to ``datetime.datetime.now()``.
-* ``tty``: ``bool``. ``True`` if the output is a terminal.
-* ``version``: ``str``. A version number. Also see :func:`cute`.
 * ``old_version``: ``str``. A version number. Only available after
   :class:`Bump` task.
+* ``pkg_name``: The ``pkg_name`` specified by the user in :func:`cute`.
+* ``py``: A special :class:`Py` Object. This allows you to use ``py`` launcher
+  corss-platform. On Windows:
+
+  .. code:: python
+  
+    "{py:2.7}".format(**conf) # -> "py -2.7"
+    
+  On Linux:
+  
+  .. code:: python
+  
+    "{py:2.7}".format(**conf) # -> "python2.7"
+  
 * ``tasks``: ``dict``. This is what you send to :func:`cute`.
-* ``curr_task``: ``str``. The name of the current task.
+* ``tty``: ``bool``. ``True`` if the output is a terminal.
+* ``version``: ``str``. A version number. Also see :func:`cute`.
 """
 
 task_converter = TaskConverter()
