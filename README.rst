@@ -220,6 +220,9 @@ Changelog
 
   - Add: support Python 2.
   - Add: documentation.
+  - Add: ``Skip``, ``run_task``, ``task_converter``.
+  - **Add: `Bump` task now update the version number inside `setup.cfg`.**
+  - Fix: ``Cmd`` task failed on Unix due to ``shell=True`` and passing ``args`` as a list.
   - **Change: the command of `Cmd` is now logged. The log message is also changed.**
   - **Drop: `noop`.**
 
