@@ -123,29 +123,55 @@ def exc(message=None):
     raise Exception(message)
     
 class Cmd:
-    """Command line runner"""
+    """Shell command executor."""
     def __init__(self, *cmds):
+        """
+        :arg list[str] cmds: A list of commands. The command may contain
+            variables which could be expanded by :func:`f`.
+            
+        If the task is a ``str``, the task would be converted into
+        :class:`Cmd`::
+        
+            cute(
+                foo = "echo foo"
+            )
+            # equals to
+            cute(
+                foo = Cmd("echo foo")
+            )
+        """
         self.cmds = cmds
         
     def __call__(self, *args):
-        """args are appended to each command."""
+        """When called, it executes each commands with :func:`subprocess.run`.
+        
+        :arg list[str] args: ``args`` are appended to each command.
+        """
         for cmd in self.cmds:
             args = shlex.split(f(cmd)) + list(args)
             log("> Cmd: {}".format(" ".join(args)))
             subprocess.run(args, shell=True, check=True)
         
 class Bump:
-    """Bump version runner"""
+    """An executor which can bump the version of a file."""
     def __init__(self, file):
+        """
+        :arg str file: Input file.
+        """
         self.file = file
         
     def __call__(self, part="patch"):
-        """Bump version number. [Expand format string]
+        """When called, it bumps the version number of the file.
 
-        It use split_version to find the version in a file. After bumping, it
-        will export "old_version", "version", and "file" into config.
+        It uses :func:`split_version` to find the version. After bumping, it
+        will export "old_version", "version", and "file" variables into
+        :const:`conf`.
         
-        See semver.bump_X for valid arguments.
+        :arg str part: Specify which part should be bumped. Possible values are
+            ``"patch"``, ``"minor"``, or ``"major"``.
+            
+            If ``part`` is a valid version number, it would bump the version
+            number to ``part``.
         """
         import semver
 
@@ -176,50 +202,102 @@ class Task:
         run(self.name, *args)
         
 class Log:
-    """A printer"""
+    """A simple printer."""
     def __init__(self, *items):
+        """
+        :arg list items: Items which would be logged.
+        """
         self.items = items
         
     def __call__(self):
+        """When called, it prints the items to the console with :func:`log`."""
         for item in self.items:
             if isinstance(item, str):
                 item = f(item)
             log(item)
         
 class Chain:
-    """Chain task runner"""
+    """An executor which runs tasks in sequence."""
     def __init__(self, *task_lists):
+        """
+        :arg list[list] task_lists: Multiple list of tasks.
+        
+        When the task is a :class:`list`, it would be converted into
+        :class:`Chain`::
+        
+            cute(
+                foo = ["echo foo", "echo bar"]
+            )
+            # equals to
+            cute(
+                foo = Chain(["echo foo", "echo bar"])
+            )
+        """
         self.task_lists = task_lists
         
     def __call__(self, *args):
-        """It chain tasks.
-
-        Note that the argument will be passed into EACH task.
+        """It runs all tasks in sequence.
+        
+        :arg list[str] args: Other arguments would be passed into *each* task.
         """
         for list in self.task_lists:
             for item in list:
                 run_task(item, *args)
                 
 class Throw:
-    """Throw error"""
+    """An executor which throws errors."""
     def __init__(self, err=None):
+        """
+        :arg err: The error.
+        :type err: str or Exception or None or class
+        
+        When the task is an instance of :class:`Exception` or a subclass of
+        :class:`Exception`, it would be converted into :class:`Throw`::
+        
+            cute(
+                foo = Exception,
+                foo2 = Exception("some message")
+            )
+            # equals to
+            cute(
+                foo = Throw(Exception),
+                foo2 = Throw(Exception("some message"))
+            )
+        """
         self.err = err
         
     def __call__(self):
+        """
+        When called, it behaves differently according to the type of ``err``:
+        
+        * If ``err`` is ``None``, re-raises last error.
+        * If ``err`` is an instance of :class:`BaseException`, raises ``err``.
+        * If ``err`` is an instance of :class:`str`, raises ``Exception(err)``.
+        * If ``err`` is callable, raises ``err()``.
+        """
         if not self.err:
             raise # pylint: disable=misplaced-bare-raise
-        if isclass(self.err):
-            raise self.err()
+        if isinstance(self.err, BaseException):
+            raise self.err
         if isinstance(self.err, str):
             raise Exception(self.err)
-        raise self.err
+        if callable(self.err):
+            raise self.err()
             
 class Try:
-    """Suppress error"""
+    """An executor which suppresses errors."""
     def __init__(self, *tasks):
+        """
+        :arg list tasks: The tasks which should be run.
+        """
         self.tasks = tasks
         
     def __call__(self, *args):
+        """When called, the tasks are executed in sequence. If a task raises
+        an error, the error would be logged and continue to the next task.
+        
+        :arg list[str] args: Other arguments would be sent to each task.
+        """
         for task in self.tasks:
             try:
                 run_task(task, *args)
@@ -337,7 +415,7 @@ def do_run(name, *args):
         
     return True
     
-class Transformer:
+class TaskConverter:
     def __init__(self):
         self.matchers = []
         
@@ -366,17 +444,43 @@ def run_task(task, *args):
 
     task(*args)
     
-t = Transformer()
+task_converter = TaskConverter()
+"""The task converter used by pyXcute.
 
-@t.add(Task)
+You can extend the converter like this::
+
+    # let's say you want to convert tasks that start with ``"my:..."`` into
+    # ``MyTask``
+    
+    # create the callable executor
+    class MyTask:
+        def __init__(self, task):
+            self.task = task
+        def __call__(self):
+            # do something to ``task``...
+            
+    # create a test function
+    def is_my_task(task):
+        return isinstance(task, str) and task.startswith("my:")
+        
+    # prepend them to ``task_converter.matchers`` so that MyTask converter is
+    # processed before Cmd converter.
+    task_converter.matchers.insert(0, (is_my_task, MyTask))
+    
+    # the task would be converted automatically
+    task_converter.transform("my:this is a custom task")
+    # -> MyTask("my:this is a custom task")
+"""
+
+@task_converter.add(Task)
 def _(task):
     return isinstance(task, str) and task in conf.get("tasks", ())
 
-@t.add(Cmd)
+@task_converter.add(Cmd)
 def _(task):
     return isinstance(task, str)
     
-@t.add(Chain)
+@task_converter.add(Chain)
 def _(task):
     try:
         iter(task)
@@ -384,7 +488,7 @@ def _(task):
         return False
     return True
     
-@t.add(Throw)
+@task_converter.add(Throw)
 def _(task):
     if isinstance(task, BaseException):
         return True
