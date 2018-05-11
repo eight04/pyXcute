@@ -150,10 +150,11 @@ def pipe():
             f.write(line)
 
 def run_cute_file():
-    from sys import executable, argv
+    from sys import executable, argv, exit
     try:
         from subprocess32 import run
     except ImportError:
         from subprocess import run
-    run([executable, "cute.py"] + argv[1:], check=True)
+    result = run([executable, "cute.py"] + argv[1:])
+    exit(result.returncode)
     
