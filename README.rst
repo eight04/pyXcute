@@ -200,9 +200,21 @@ Live example
 ------------
 	
 Checkout `the cute file <https://github.com/eight04/pyXcute/blob/master/cute.py>`_ of pyXcute itself.
+
+Documentation
+-------------
+
+TBD
   
 Changelog
 ---------
+
+* 0.5.0 (Next)
+
+  - Add: support Python 2.
+  - Add: documentation.
+  - **Change: the command of `Cmd` is now logged. The log message is also changed.**
+  - **Drop: `noop`.**
 
 * 0.4.1 (Apr 3, 2017)
 
