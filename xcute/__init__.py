@@ -12,7 +12,10 @@ except ImportError:
     import pathlib
 import sys
 import shlex
-import subprocess
+try:
+    import subprocess32 as subprocess
+except ImportError:
+    import subprocess
 import traceback
 
 from .__pkginfo__ import __version__

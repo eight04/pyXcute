@@ -1,5 +1,7 @@
 #! python3
 
+from __future__ import print_function
+
 def iter_files(src, patterns, ignores=None, no_subdir=False, no_dir=False):
     """Iter through files/folders matching glob patterns.
     
@@ -33,16 +35,21 @@ def iter_files(src, patterns, ignores=None, no_subdir=False, no_dir=False):
             
     if no_subdir:
         # no_subdir doesn't keep patterns' order
-        yield from _iter_files((f for p in patterns for f in src.glob(p)))
+        for file in _iter_files((f for p in patterns for f in src.glob(p))):
+            yield file
     else:
         for pattern in patterns:
-            yield from _iter_files(src.glob(pattern))
+            for file in _iter_files(src.glob(pattern)):
+                yield file
 
     if not processed:
         print("No file is matched.")
         
 def base_parser(description):
-    from pathlib import Path
+    try:
+        from pathlib2 import Path
+    except ImportError:
+        from pathlib import Path
     from argparse import ArgumentParser
     
     parser = ArgumentParser(description=description)
@@ -58,15 +65,17 @@ def base_parser(description):
         help="Glob pattern matching files/folders.")
         
     def files(**options):
-        yield from iter_files(
-            parse().src, parse().patterns, ignores=parse().ignores, **options)
+        for file in iter_files(
+            parse().src, parse().patterns, ignores=parse().ignores, **options
+        ):
+            yield file
             
-    args = None
+    class NS:
+        args = None
     def parse():
-        nonlocal args
-        if not args:
-            args = parser.parse_args()
-        return args
+        if not NS.args:
+            NS.args = parser.parse_args()
+        return NS.args
         
     return parser.add_argument, parse, files
 
@@ -93,7 +102,10 @@ def concat():
         print(file.read_text("utf-8"), end=args.end)
     
 def copy():
-    from pathlib import Path
+    try:
+        from pathlib2 import Path
+    except ImportError:
+        from pathlib import Path
     from shutil import copy2
     from os import makedirs
     
@@ -117,7 +129,10 @@ def copy():
     
 def pipe():
     from argparse import ArgumentParser
-    from pathlib import Path
+    try:
+        from pathlib2 import Path
+    except ImportError:
+        from pathlib import Path
     from sys import stdin
     from os import makedirs
 
@@ -133,3 +148,12 @@ def pipe():
     with args.dest.open("wb") as f:
         for line in stdin.buffer:
             f.write(line)
+
+def run_cute_file():
+    from sys import executable, argv
+    try:
+        from subprocess32 import run
+    except ImportError:
+        from subprocess import run
+    run([executable, "cute.py"] + argv[1:], check=True)
+    
