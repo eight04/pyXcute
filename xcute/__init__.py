@@ -2,8 +2,6 @@
 
 from __future__ import print_function
 
-from .__pkginfo__ import __version__
-
 from contextlib import contextmanager
 import datetime
 from inspect import isclass
@@ -16,6 +14,8 @@ import sys
 import shlex
 import subprocess
 import traceback
+
+from .__pkginfo__ import __version__
 
 # config object. Task runner will use this dict to expand format string.
 conf = {
@@ -239,8 +239,8 @@ class Chain:
         
         :arg list[str] args: Other arguments would be passed into *each* task.
         """
-        for list in self.task_lists:
-            for item in list:
+        for tasks in self.task_lists:
+            for item in tasks:
                 run_task(item, *args)
                 
 class Throw:
@@ -274,8 +274,9 @@ class Throw:
         * If ``err`` is an instance of :class:`str`, raises ``Exception(err)``.
         * If ``err`` is callable, raises ``err()``.
         """
+        # pylint: disable=exceptions
         if not self.err:
-            raise # pylint: disable=misplaced-bare-raise
+            raise
         if isinstance(self.err, BaseException):
             raise self.err
         if isinstance(self.err, str):
