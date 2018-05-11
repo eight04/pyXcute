@@ -199,7 +199,7 @@ class Bump:
             cfg_content = cfg.read_text(encoding="utf-8")
         except IOError:
             return
-        match = re.search("^version\s*=\s*(\S+?)\s*$", cfg_content, re.M)
+        match = re.search(r"^version\s*=\s*(\S+?)\s*$", cfg_content, re.M)
         if not match:
             return
         new_cfg_content = cfg_content[:match.start(1)] + version + cfg_content[match.end(1):]
