@@ -148,13 +148,3 @@ def pipe():
     with args.dest.open("wb") as f:
         for line in stdin.buffer:
             f.write(line)
-
-def run_cute_file():
-    from sys import executable, argv, exit
-    try:
-        from subprocess32 import run
-    except ImportError:
-        from subprocess import run
-    result = run([executable, "cute.py"] + argv[1:])
-    exit(result.returncode)
-    
