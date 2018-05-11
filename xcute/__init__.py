@@ -255,9 +255,34 @@ class Skip:
         self.should_skip = should_skip
         
     def __call__(self, *args):
-        """
-        :arg list[str] args: If ``should_skip`` is a function, it would receive
-          additional arguments.
+        """Skip the test if ``should_skip`` or ``should_skip(*args)`` is not
+        truthy.
+        
+        :arg list[str] args: Additional arguments are passed to the task and
+            ``should_skip`` if it is a function.
+            
+        Usually, you can just use comparators to run task conditionally:
+        
+        .. code:: python
+            
+            cute(
+                foo = sys.version_info >= (3, ) and "echo Python 3+"
+            )
+            
+        :class:`Skip` would log a ``Skip: ...`` information to the
+        console when a task is skipped:
+        
+        .. code:: python
+        
+            cute(
+                foo = Skip("echo Python 3+", sys.version_info < (3, ))
+            )
+            
+        Result::
+        
+            $ python2 cute.py foo
+            > Task: foo
+            > Skip: echo Python 3+
         """
         if callable(self.should_skip):
             should_skip = self.should_skip(*args)
@@ -475,7 +500,7 @@ def run_task(task, *args):
     """
     task = task_converter.transform(task)
         
-    if task is None:
+    if not task:
         return
     if not callable(task):
         raise Exception("{task!r} is not callable".format(task=task))
