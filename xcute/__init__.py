@@ -18,7 +18,7 @@ except ImportError:
     import subprocess
 import traceback
 
-from .__pkginfo__ import __version__
+__version__ = "0.4.1"
 
 # config object. Task runner will use this dict to expand format string.
 conf = {
@@ -194,6 +194,16 @@ class Bump:
             old_version=old_version,
             version=version
         ))
+        cfg = pathlib.Path("setup.cfg")
+        try:
+            cfg_content = cfg.read_text(encoding="utf-8")
+        except IOError:
+            return
+        match = re.search("^version\s*=\s*(\S+?)\s*$", cfg_content, re.M)
+        if not match:
+            return
+        new_cfg_content = cfg_content[:match.start(1)] + version + cfg_content[match.end(1):]
+        cfg.write_text(new_cfg_content, encoding="utf-8")
             
 class Task:
     """Run conf["tasks"][name]"""
