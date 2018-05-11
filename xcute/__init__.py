@@ -18,7 +18,7 @@ except ImportError:
     import subprocess
 import traceback
 
-__version__ = "0.4.1"
+__version__ = "0.5.0"
 
 # config object. Task runner will use this dict to expand format string.
 conf = {
