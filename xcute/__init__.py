@@ -496,10 +496,26 @@ class TaskConverter:
         return item
     
 def run_task(task, *args):
-    """Run user task.
-
-    It handles non-callable user task and converts them into Chain, Task or
-    Cmd.
+    """Run user task. It handles non-callable user task and converts them into
+    :class:`Chain`, :class:`Task`, or :class:`Cmd`.
+    
+    :arg task: The task.
+    :arg list[str] args: Additional that would be passed to the task.
+    
+    Call this function if you have to execute other tasks in your customized
+    executor:
+    
+    .. code:: python
+    
+        def my_task():
+            # do something...
+            run_task("bar") # run "bar" task
+            # do something...
+    
+        cute(
+            foo = my_task,
+            bar = "echo bar"
+        )
     """
     task = task_converter.transform(task)
         

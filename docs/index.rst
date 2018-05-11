@@ -25,6 +25,8 @@ Functions
 
 .. autofunction:: log
 
+.. autofunction:: run_task
+
 .. autofunction:: split_version
 
 Classes
