@@ -4,6 +4,9 @@ pyXcute
 .. image:: https://api.codacy.com/project/badge/Grade/6ffe1c58a9f7404293f870a5183d8ad8    
   :target: https://www.codacy.com/app/eight04/pyXcute?utm_source=github.com&amp;utm_medium=referral&amp;utm_content=eight04/pyXcute&amp;utm_campaign=Badge_Grade
   
+.. image:: https://travis-ci.org/eight04/pyXcute.svg?branch=master
+  :target: https://travis-ci.org/eight04/pyXcute
+    
 .. image:: http://readthedocs.org/projects/pyxcute/badge/?version=latest
   :target: http://pyxcute.readthedocs.io/en/latest/?badge=latest
   :alt: Documentation Status
