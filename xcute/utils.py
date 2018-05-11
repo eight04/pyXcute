@@ -2,6 +2,8 @@
 
 from __future__ import print_function
 
+from contextlib import suppress
+
 def iter_files(src, patterns, ignores=None, no_subdir=False, no_dir=False):
     """Iter through files/folders matching glob patterns.
     
@@ -122,7 +124,8 @@ def copy():
         new_file = args.dest / file.relative_to(args.src)
         print("copy", file, "to", new_file)
         if new_file.parent not in created_parents:
-            makedirs(new_file.parent, exist_ok=True)
+            with suppress(OSError):
+                makedirs(new_file.parent)
             created_parents.add(new_file.parent)
         copy2(file, new_file)
     
@@ -143,7 +146,8 @@ def pipe():
         help="Destination file.")
     args = parser.parse_args()
         
-    makedirs(args.dest.parent, exist_ok=True)
+    with suppress(OSError):
+        makedirs(args.dest.parent)
     with args.dest.open("wb") as f:
         for line in stdin.buffer:
             f.write(line)
