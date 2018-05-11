@@ -143,5 +143,6 @@ def pipe():
         
     args.dest.parent.mkdir(parents=True, exist_ok=True)
     with args.dest.open("wb") as f:
-        for line in stdin.buffer:
+        buffer = stdin.buffer if hasattr(stdin, "buffer") else stdin
+        for line in buffer:
             f.write(line)
