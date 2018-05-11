@@ -14,8 +14,10 @@ Features
 * A builtin Bump task which can bump version with `semver <https://github.com/k-bx/python-semver>`_.
 * A small set of cross-platform CLI utils.
 
-Install
--------
+Installation
+------------
+
+From `pypi <https://pypi.org/project/pyxcute/>`__
 
 .. code:: bash
 
@@ -27,37 +29,41 @@ Usage
 Basic
 ~~~~~
 
-Create a ``cute.py`` file like this:
+Create a ``cute.py`` file:
 
 .. code:: python
 
-	from xcute import cute
-	
-	cute(
-		hello = 'echo hello xcute!'
-	)
+  from xcute import cute
+  
+  cute(
+    hello = 'echo hello xcute!'
+  )
 	
 then run:
 
 .. code:: bash
 
-	>cute hello
-	hello...
-	hello xcute!
+  $ cute hello
+  > Task: hello
+  > Cmd: echo hello xcute!
+  hello xcute!
 	
-"hello" is the task to run. If ``cute.py`` is executed without a task name, it will run "default" task.
-	
-(If you get a "not a command" error, see `How do I make Python scripts executable? <https://docs.python.org/3/faq/windows.html#how-do-i-make-python-scripts-executable>`_)
+..
+  
+  If you get a "not a command" error, see `How do I make Python scripts executable? <https://docs.python.org/3/faq/windows.html#how-do-i-make-python-scripts-executable>`_)
+
+"hello" is the name of the task that should be executed. If ``cute.py`` is executed without a task name, it will run the "default" task.
 	
 Provide additional arguments:
 
 .. code:: bash
 
-	>cute hello 123
-	hello...
-	hello xcute! 123
+  $ cute hello 123
+  > Task: hello
+  > Cmd: echo hello xcute! 123
+  hello xcute! 123
 
-The arguments will be passed into the runner, which is ``xcute.Cmd.__call__`` in this case.
+The arguments will be passed into the executor, which is ``xcute.Cmd.__call__`` in this case.
 
 Tasks
 ~~~~~
@@ -66,44 +72,53 @@ It can be a str:
 
 .. code:: python
 	
-	from xcute import cute
-	
-	cute(
-		hello = 'echo hello'
-	)
+  from xcute import cute
+
+  cute(
+    hello = 'echo hello'
+  )
 	
 If it match the name of another task, pyxcute will execute that task:
 
 .. code:: python
 
-	from xcute import cute
-	
-	cute(
-		hello = 'world',
-		world = 'echo execute world task'
-	)
+  from xcute import cute
+
+  cute(
+    hello = 'world', # execute "world" task when "hello" task is executed
+    world = 'echo I am world task'
+  )
 	
 Use a list:
 
 .. code:: python
 
-	from xcute import cute
-	
-	cute(
-		hello = ['echo task1', 'echo task2']
-	)
-	
-Or anything that is callable:
+  from xcute import cute
+  
+  cute(
+    hello = ['echo task1', 'echo task2']
+  )
+  
+Using an Exception would make the task fail:
 
 .. code:: python
 
-	from xcute import cute
+  from xcute import cute
+  cute(
+    hello = Exception("error message")
+  )
 	
-	cute(
-		hello = lambda: print('say hello')
-	)
+Use anything that is callable:
+
+.. code:: python
+
+  from xcute import cute
+
+  cute(
+    hello = lambda: print('say hello')
+  )
   
-Actually, when you assign a non-callable as a task, pyxcute converts it into a callable according to its type. See `xcute.Cmd`_, `xcute.Chain`_, `xcute.Throw`_., and `xcute.Task`_
+Actually, when you assign a non-callable value as a task, pyXcute converts it into a callable according to its type.
 
 Task chain
 ~~~~~~~~~~
@@ -122,7 +137,7 @@ Define the workflow with ``_pre``, ``_err``, ``_post``, ``_fin`` suffix:
 		hello_fin = 'echo _fin always runs after _post, _err just like finally'
 	)
 	
-When a task is involved, it will firstly try to execute _pre task, then the task itself, then the _post task. If the task raised an exception, then it goes to _err task. And finally the _fin task.
+When a task is executed, the task runner try to execute ``_pre`` task first, then the task itself, then the ``_post`` task. If the task raised an exception, then it goes to the ``_err`` task. ``_fin`` task would be executed whenever the task failed or not.
 
 Pseudo code:
 
@@ -132,8 +147,7 @@ Pseudo code:
 	try:
 		run(name, args)
 	except Exception:
-		if run(name + "_err") not exist:
-			raise
+		run(name + "_err")
 	else:
 		run(name + "_post")
 	finally:
@@ -142,7 +156,7 @@ Pseudo code:
 Format string
 ~~~~~~~~~~~~~
 
-pyXcute expands format string with `xcute.conf`_ dictionary when the task is executed:
+pyXcute expands the command string with ``xcute.conf`` dictionary. The expansion is happened at run-time:
 
 .. code:: python
 
@@ -150,19 +164,24 @@ pyXcute expands format string with `xcute.conf`_ dictionary when the task is exe
   
   conf["my_name"] = "world"
   
-  def edit_conf():
+  def change_my_name():
     conf["my_name"] = "bad world"
 
   cute(
-    hello_pre = edit_conf,
-    hello = "echo hello {my_name}"
+    hello = [
+      "echo hello {my_name}",
+      change_my_name,
+      "echo hello {my_name}"
+    ]
   )
   
 .. code:: bash
 
-  > cute hello
-  hello_pre...
-  hello...
+  $ cute hello
+  > Task: hello
+  > Cmd: echo hello world
+  hello world
+  > Cmd: echo hello bad world
   hello bad world
   
 Cross-platform utils
@@ -182,193 +201,20 @@ Live example
 	
 Checkout `the cute file <https://github.com/eight04/pyXcute/blob/master/cute.py>`_ of pyXcute itself.
 
-API reference
+Documentation
 -------------
 
-xcute.conf
-~~~~~~~~~~
-
-A dictionary used to format string. By the default, it has following keys:
-
-* pkg_name - package name. See `xcute.cute`_.
-* date - ``datetime.datetime.now()``.
-* tty - a boolean shows if the output is a terminal.
-* version - version number. Available after Bump task. Also see pkg_name section in `xcute.cute`_.
-* old_version - version number before bump. Only available after Bump task.
-* tasks - a dictionary. This is what you send to ``cute()``.
-* curr_task - str. The name of current task.
-
-xcute.cute
-~~~~~~~~~~
-
-.. code:: python
-
-  cute(**tasks)
-
-The entry point.
-
-Here are some special tasks:
-
-* pkg_name - when this key is found in tasks, the key is removed and inserted into the ``conf`` dictionary.
-
-  Then, ``cute()`` tries to find version number from ``{pkg_name}/__init__.py``, ``{pkg_name}/__pkginfo__.py``. If found, the filename is added to ``conf["version_file"]``, and the version is added to ``conf["version"]``.
-  
-  The regex used to match version number is decribed at ``xcute.split_version``.
-  
-* version - if not provided, pyxcute uses ``Log("{version}")`` as default.
-* bump - if not provided, pyxcute uses ``Bump("{version_file}")`` as default.
-
-xcute.exc
-~~~~~~~~~
-
-.. code:: python
-
-  exc(message=None)
-  
-Raise an exception. It reraises the last error if message is not provided.
-
-.. code:: python
-  
-  from xcute import cute, exc
-
-  cute(
-    ...
-    task_err = ["handle error...", exc]
-  )
-
-xcute.f
-~~~~~~~
-
-.. code:: python
-
-  f(string)
-  
-Expand string with xcute.conf dictionary.
-
-xcute.log
-~~~~~~~~~
-
-.. code:: python
-
-  log(items)
-  
-A print function, but only works if ``conf["tty"] == False``.
-
-xcute.noop
-~~~~~~~~~~
-
-.. code:: python
-
-  noop(*args, **kwargs)
-  
-A noop.
-
-xcute.split_version
-~~~~~~~~~~~~~~~~~~~
-
-.. code:: python
-
-  split_version(text)
-
-Split text into a ``(left, verion, right)`` tuple.
-
-The regex pattern used to find version:
-
-.. code:: python
-
-	"__version__ = ['\"]([^'\"]+)"	
-
-xcute.Bump
-~~~~~~~~~~
-
-``Bump`` task can bump version number in a file, using `xcute.split_version`_ and `semver`_.
-
-.. code:: python
-
-	from xcute import cute, Bump
-	
-	cute(
-		bump = Bump('path/to/target/file')
-	)
-	
-then run
-
-.. code:: bash
-
-	cute bump [major|minor|patch|prerelease|build]
-	
-the argument is optional, default to ``patch``.
-
-xcute.Chain
-~~~~~~~~~~~
-
-This task would run each task inside a task list.
-
-.. code:: python
-
-  Chain(*task_list)
-  
-Tasks are converted to Chain if they are iterable.
-
-xcute.Cmd
-~~~~~~~~~
-
-This task is used to run shell command.
-
-.. code:: python
-
-  Cmd(*shell_command)
-  
-Tasks are converted to Cmd if they are str.
-
-xcute.Log
-~~~~~~~~~
-
-A wrapper to ``print``. It is useless if you can just ``"echo something"``.
-
-.. code:: python
-
-  Log(*text)
-  
-xcute.Task
-~~~~~~~~~~
-
-This task executes another task.
-
-.. code:: python
-
-  Task(task_name)
-  
-Tasks are converted to Task if they are keys of tasks dictionary.
-  
-xcute.Throw
-~~~~~~~~~~~
-
-This task throws error.
-
-.. code:: python
-
-  Throw()
-  Throw(error)
-  Throw(exc_cls, message=None)
-  
-1. Reraise last error.
-2. Raise the error.
-3. Raise ``exc_cls(message)``
-
-Tasks are converted to Throw if they are subclass or instance of BaseException.
-  
-xcute.Try
-~~~~~~~~~
-
-This task suppress exception.
-
-.. code:: python
-
-  Try(*task)
+TBD
   
 Changelog
 ---------
+
+* 0.5.0 (Next)
+
+  - Add: support Python 2.
+  - Add: documentation.
+  - **Change: the command of `Cmd` is now logged. The log message is also changed.**
+  - **Drop: `noop`.**
 
 * 0.4.1 (Apr 3, 2017)
 
