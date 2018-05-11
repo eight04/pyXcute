@@ -216,7 +216,7 @@ http://pyxcute.readthedocs.io/en/latest/
 Changelog
 ---------
 
-* 0.5.0 (Next)
+* 0.5.0 (May 11, 2018)
 
   - Add: support Python 2.
   - Add: documentation.
