@@ -99,7 +99,7 @@ def log(*items):
     
     If ``conf["tty"]`` is False, this function has no effect.
     
-    :arg list items: The items would be logged with ``pring(*items)``.
+    :arg list items: ``items`` would be logged with ``print(*items)``.
     """
     if conf["tty"]:
         print(*items)
@@ -153,7 +153,7 @@ class Cmd:
             subprocess.run(args, shell=True, check=True)
         
 class Bump:
-    """An executor which can bump the version of a file."""
+    """An executor which can bump the version inside a .py file."""
     def __init__(self, file):
         """
         :arg str file: Input file.
@@ -163,20 +163,19 @@ class Bump:
     def __call__(self, part="patch"):
         """When called, it bumps the version number of the file.
 
-        It uses :func:`split_version` to find the version. After bumping, it
-        will export "old_version", "version", and "file" variables into
-        :const:`conf`.
-        
         :arg str part: Specify which part should be bumped. Possible values are
             ``"patch"``, ``"minor"``, or ``"major"``.
             
             If ``part`` is a valid version number, it would bump the version
             number to ``part``.
+            
+        It uses :func:`split_version` to find the version. After bumping, it
+        would assign the old version to ``conf["old_version"]`` and the new
+        version to ``conf["version"]``.
         """
         import semver
 
         file = pathlib.Path(f(self.file))
-        conf["file"] = file
         left, old_version, right = split_version(file.read_text(encoding="utf-8"))
         bump = getattr(semver, "bump_" + part, None)
         conf["old_version"] = old_version
@@ -297,6 +296,16 @@ class Try:
         an error, the error would be logged and continue to the next task.
         
         :arg list[str] args: Other arguments would be sent to each task.
+        
+        Example::
+        
+            cute(
+                foo = Try(
+                    "echo execute and fail && exit 1", # executed
+                    "echo execute and fail && exit 1" # executed
+                ),
+                foo_err = "echo foo failed" # not executed
+            )
         """
         for task in self.tasks:
             try:
@@ -308,9 +317,7 @@ def cute(**tasks):
     """Main entry point.
 
     Define your tasks as keyword arguments. Those tasks would be assigned to
-    :const:`conf`::
-    
-        conf["tasks"] = tasks
+    :const:`conf` with key ``"tasks"``.
         
     There are some tasks having special effects:
 
@@ -319,18 +326,20 @@ def cute(**tasks):
       - The key is removed and inserted into :const:`conf`. This allows you to
         specify ``{pkg_name}`` variable in other tasks.
         
-      - The module would try to find version number from
-        ``{pkg_name}/__init__.py`` and ``{pkg_name}/__pkginfo__.py``. If found,
-        The filename is inserted to :const:`conf` with key ``version_file``, and
-        the version is inserted as ``version``.
+      - The module would try to find the version number from
+        ``{pkg_name}/__init__.py`` or ``{pkg_name}/__pkginfo__.py``. If found,
+        the filename is inserted to :const:`conf` with key ``"version_file"``,
+        and the version is inserted with key ``"version"``.
 
         See :func:`split_version` for the regular expression matching
         ``__version__``.
         
     Some tasks have a default value:
       
-    * ``version``: If not provided, it defaults to ``Log("{version}")``.
-    * ``bump``: If not provided, it defaults to ``Bump("{version_file}")``.
+    * ``version``: ``Log("{version}")``. You can run ``cute version`` to log
+      the version of ``{pkg_name}`` module.
+    * ``bump``: ``Bump("{version_file}")``. You can run ``cute bump 
+      [major|minor|patch]`` to bump the version of ``{version_file}``.
     """
     conf["tasks"] = tasks
     
