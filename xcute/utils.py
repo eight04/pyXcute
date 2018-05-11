@@ -2,8 +2,6 @@
 
 from __future__ import print_function
 
-from contextlib import suppress
-
 def iter_files(src, patterns, ignores=None, no_subdir=False, no_dir=False):
     """Iter through files/folders matching glob patterns.
     
@@ -108,7 +106,6 @@ def copy():
     except ImportError:
         from pathlib import Path
     from shutil import copy2
-    from os import makedirs
     
     add, parse, files = base_parser(
         "Copy files. Note that if pattern matches a folder, the"
@@ -124,8 +121,7 @@ def copy():
         new_file = args.dest / file.relative_to(args.src)
         print("copy", file, "to", new_file)
         if new_file.parent not in created_parents:
-            with suppress(OSError):
-                makedirs(new_file.parent)
+            new_file.parent.mkdir(parents=True, exist_ok=True)
             created_parents.add(new_file.parent)
         copy2(file, new_file)
     
@@ -136,7 +132,6 @@ def pipe():
     except ImportError:
         from pathlib import Path
     from sys import stdin
-    from os import makedirs
 
     parser = ArgumentParser(
         description="Read stdin and output to a file. Missing folders are "
@@ -146,8 +141,7 @@ def pipe():
         help="Destination file.")
     args = parser.parse_args()
         
-    with suppress(OSError):
-        makedirs(args.dest.parent)
+    args.dest.parent.mkdir(parents=True, exist_ok=True)
     with args.dest.open("wb") as f:
         for line in stdin.buffer:
             f.write(line)
