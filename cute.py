@@ -35,6 +35,5 @@ cute(
     ],
     readme_pre = "readme_build",
     readme = readme,
-    doc = 'sphinx-autobuild -B -z {pkg_name} docs docs/build',
-    foo = Exception("hello")
+    doc = 'sphinx-autobuild -B -z {pkg_name} docs docs/build'
 )

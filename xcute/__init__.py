@@ -243,6 +243,32 @@ class Chain:
             for item in tasks:
                 run_task(item, *args)
                 
+class Skip:
+    """Run task conditionally."""
+    def __init__(self, task, should_skip=None):
+        """
+        :arg task: The task.
+        :arg should_skip: Whether to skip the task.
+        :type should_skip: bool or callable
+        """
+        self.task = task
+        self.should_skip = should_skip
+        
+    def __call__(self, *args):
+        """
+        :arg list[str] args: If ``should_skip`` is a function, it would receive
+          additional arguments.
+        """
+        if callable(self.should_skip):
+            should_skip = self.should_skip(*args)
+        else:
+            should_skip = self.should_skip
+            
+        if should_skip:
+            log("> Skip: {}".format(self.task))
+        else:
+            run_task(self.task, *args)
+                
 class Throw:
     """An executor which throws errors."""
     def __init__(self, err=None):

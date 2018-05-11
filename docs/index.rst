@@ -42,6 +42,9 @@ Classes
 .. autoclass:: Log
   :members: __call__
   
+.. autoclass:: Skip
+  :members: __call__
+  
 .. autoclass:: Throw
   :members: __call__
   
