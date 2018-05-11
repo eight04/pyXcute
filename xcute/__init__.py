@@ -446,7 +446,7 @@ def run_task(task, *args):
     It handles non-callable user task and converts them into Chain, Task or
     Cmd.
     """
-    task = t.transform(task)
+    task = task_converter.transform(task)
         
     if not callable(task):
         raise Exception("{task!r} is not callable".format(task=task))
