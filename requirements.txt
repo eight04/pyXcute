@@ -5,3 +5,4 @@ pylint>=1.8.4,<2
 sphinx-autobuild>=0.7.1,<0.8
 Sphinx>=1.6.5,<2
 livereload>=2.5.2,<3
+-e .
