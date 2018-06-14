@@ -216,6 +216,11 @@ http://pyxcute.readthedocs.io/en/latest/
 Changelog
 ---------
 
+* 0.5.2 (Jun 14, 2018)
+
+  - Add: support ``bumper`` argument in ``Bump``.
+  - Add: support Python 3.4. Drop ``subprocess32``.
+
 * 0.5.1 (May 12, 2018)
 
   - Add: ``conf["py"]`` variable.
