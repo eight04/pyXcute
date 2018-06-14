@@ -15,7 +15,7 @@ import shlex
 import subprocess
 import traceback
 
-__version__ = "0.5.1"
+__version__ = "0.5.2"
 
 def f(text):
     """Format the string with :const:`conf`.
