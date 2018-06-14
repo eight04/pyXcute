@@ -12,10 +12,7 @@ except ImportError:
     import pathlib
 import sys
 import shlex
-try:
-    import subprocess32 as subprocess
-except ImportError:
-    import subprocess
+import subprocess
 import traceback
 
 __version__ = "0.5.1"
@@ -141,7 +138,7 @@ class Cmd:
         for cmd in self.cmds:
             args = shlex.split(f(cmd)) + list(args)
             log("> Cmd: {}".format(" ".join(args)))
-            subprocess.run(subprocess.list2cmdline(args), shell=True, check=True)
+            subprocess.check_call(subprocess.list2cmdline(args), shell=True)
         
 class Bump:
     """An executor which can bump the version inside a .py file."""
