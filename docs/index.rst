@@ -29,6 +29,8 @@ Functions
 
 .. autofunction:: split_version
 
+.. autofunction:: semver_bumper
+
 Classes
 -------
 

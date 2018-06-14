@@ -139,24 +139,43 @@ class Cmd:
             args = shlex.split(f(cmd)) + list(args)
             log("> Cmd: {}".format(" ".join(args)))
             subprocess.check_call(subprocess.list2cmdline(args), shell=True)
+            
+def semver_bumper(old_version, part="patch"):
+    """Bump the version with ``semver`` module.
+    
+    :arg str part: Specify which part should be bumped. Possible values are
+        ``"patch"``, ``"minor"``, or ``"major"``.
+        
+        If ``part`` is a valid version number, it would bump the version
+        number to ``part``.
+    :rtype: str
+    :return: new version number.
+    """
+    import semver
+    bump = getattr(semver, "bump_" + part, None)
+    if callable(bump):
+        new_version = bump(old_version)
+    else:
+        new_version = part
+        semver.parse(new_version)
+    return new_version
         
 class Bump:
     """An executor which can bump the version inside a .py file."""
-    def __init__(self, file):
+    def __init__(self, file, bumper=semver_bumper):
         """
         :arg str file: Input file.
+        :arg callable bumper: A callable that would bump a version. The
+            signature is ``bumper(version: str, *args) -> new_version: str``.
+            Default to :func:`semver_bumper`.
         """
         self.file = file
+        self.bumper = bumper
         
-    def __call__(self, part="patch"):
-        """When called, it bumps the version number of the file.
+    def __call__(self, *args):
+        """When called, it bumps the version number of the file. Additional
+        arguments are sent to ``bumper``.
 
-        :arg str part: Specify which part should be bumped. Possible values are
-            ``"patch"``, ``"minor"``, or ``"major"``.
-            
-            If ``part`` is a valid version number, it would bump the version
-            number to ``part``.
-            
         It uses :func:`split_version` to find the version. After bumping, it
         would:
 
@@ -165,17 +184,10 @@ class Bump:
         3. Try to find the version number inside ``setup.cfg`` and update it to
            the new version.
         """
-        import semver
-
         file = pathlib.Path(f(self.file))
         left, old_version, right = split_version(file.read_text(encoding="utf-8"))
-        bump = getattr(semver, "bump_" + part, None)
         conf["old_version"] = old_version
-        if callable(bump):
-            version = bump(old_version)
-        else:
-            version = part
-            semver.parse(version)
+        version = self.bumper(old_version, *args)
         conf["version"] = version
         file.write_text(left + version + right, encoding="utf-8")
         log("Bump {file} from {old_version} to {version}".format(
