@@ -147,7 +147,9 @@ def semver_bumper(old_version, part="patch"):
         ``"patch"``, ``"minor"``, or ``"major"``.
         
         If ``part`` is a valid version number, it would bump the version
-        number to ``part``.        
+        number to ``part``.
+    :rtype: str
+    :return: new version number.
     """
     import semver
     bump = getattr(semver, "bump_" + part, None)
