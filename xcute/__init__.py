@@ -379,6 +379,40 @@ class Try:
                 run_task(task, *args)
             except Exception as err: # pylint: disable=broad-except
                 log(err)
+                
+class LiveReload:
+    """An executor which spawns a live-reload server."""
+    def __init__(self, pattern, task, html_base, **kwargs):
+        """
+        :arg pattern: Glob pattern, filename, or folder to be watched.
+        :type pattern: str or list[str]
+        :arg task: A task that should be run when the file changes.
+        :arg str html_base: Path to the folder containing HTML files.
+        :arg kwargs: Other arguments will be passed to `Server.serve <https://github.com/lepture/python-livereload/blob/d5f6a2e3fab5e4308dc744e26792ce83581703d9/livereload/server.py#L275>`__
+        """
+        self.pattern = [self.pattern] if isinstance(pattern, str) else pattern
+        self.task = task
+        self.html_base = html_base
+        self.kwargs = kwargs
+        
+    def __call__(self):
+        """When called, spawn a `livereload <https://github.com/lepture/python-livereload>`
+        server.
+        
+        `A live example <https://github.com/eight04/pyXcute/blob/master/cute.py>`__
+        """
+        from livereload import Server
+        # pylint: disable=no-member
+        # https://github.com/lepture/python-livereload/issues/209
+        import asyncio
+        try:
+            asyncio.set_event_loop_policy(asyncio.WindowsSelectorEventLoopPolicy())
+        except AttributeError:
+            pass
+        server = Server()
+        for p in pattern:
+            server.watch(f(p), lambda: run_task(task))
+        server.serve(open_url_delay=1, root=self.html_base)
 
 def cute(**tasks):
     """Main entry point.
