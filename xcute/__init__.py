@@ -388,7 +388,8 @@ class LiveReload:
         :type pattern: str or list[str]
         :arg task: A task that should be run when the file changes.
         :arg str html_base: Path to the folder containing HTML files.
-        :arg kwargs: Other arguments will be passed to `Server.serve <https://github.com/lepture/python-livereload/blob/d5f6a2e3fab5e4308dc744e26792ce83581703d9/livereload/server.py#L275>`__
+        :arg kwargs: Other arguments will be passed to `Server.serve
+        <https://github.com/lepture/python-livereload/blob/d5f6a2e3fab5e4308dc744e26792ce83581703d9/livereload/server.py#L275>`__
         """
         self.pattern = [self.pattern] if isinstance(pattern, str) else pattern
         self.task = task
@@ -410,8 +411,8 @@ class LiveReload:
         except AttributeError:
             pass
         server = Server()
-        for p in pattern:
-            server.watch(f(p), lambda: run_task(task))
+        for p in self.pattern:
+            server.watch(f(p), lambda: run_task(self.task))
         server.serve(open_url_delay=1, root=self.html_base)
 
 def cute(**tasks):
@@ -465,10 +466,10 @@ def cute(**tasks):
     except subprocess.CalledProcessError as err:
         # printing stack trace of process error doesn't help
         log(err)
-        exit(1)
+        sys.exit(1)
     except Exception: # pylint: disable=broad-except
         traceback.print_exc()
-        exit(1)
+        sys.exit(1)
     
 def parse_args(args=None):
     """Parse sys.argv. Export "init", "args" to config."""
