@@ -413,7 +413,7 @@ class LiveReload:
         server = Server()
         for p in self.pattern:
             server.watch(f(p), lambda: run_task(self.task))
-        server.serve(open_url_delay=1, root=self.html_base)
+        server.serve(open_url_delay=1, root=self.html_base, **self.kwargs)
 
 def cute(**tasks):
     """Main entry point.
