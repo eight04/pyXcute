@@ -7,9 +7,9 @@ import datetime
 from inspect import isclass
 import re
 try:
-    import pathlib2 as pathlib
-except ImportError:
     import pathlib
+except ImportError:
+    import pathlib2 as pathlib
 import sys
 import shlex
 import subprocess
