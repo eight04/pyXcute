@@ -389,15 +389,15 @@ class LiveReload:
         :arg task: A task that should be run when the file changes.
         :arg str html_base: Path to the folder containing HTML files.
         :arg kwargs: Other arguments will be passed to `Server.serve
-        <https://github.com/lepture/python-livereload/blob/d5f6a2e3fab5e4308dc744e26792ce83581703d9/livereload/server.py#L275>`__
+            <https://github.com/lepture/python-livereload/blob/d5f6a2e3fab5e4308dc744e26792ce83581703d9/livereload/server.py#L275>`__
         """
-        self.pattern = [self.pattern] if isinstance(pattern, str) else pattern
+        self.pattern = [pattern] if isinstance(pattern, str) else pattern
         self.task = task
         self.html_base = html_base
         self.kwargs = kwargs
         
     def __call__(self):
-        """When called, spawn a `livereload <https://github.com/lepture/python-livereload>`
+        """When called, spawn a `livereload <https://github.com/lepture/python-livereload>`__
         server.
         
         `A live example <https://github.com/eight04/pyXcute/blob/master/cute.py>`__
@@ -580,8 +580,7 @@ conf = {
 }
 """A dictionary that is used across all tasks. It has 2 purpoeses: 
 
-1. A convenience way to share variables between your ``cute.py`` file and 
-  ``xcute`` module.
+1. A convenience way to share variables between your ``cute.py`` file and ``xcute`` module.
 2. The context for string formatting. See :func:`f`.
 
 By default, it has following keys:
@@ -607,6 +606,7 @@ By default, it has following keys:
 * ``tasks``: ``dict``. This is what you send to :func:`cute`.
 * ``tty``: ``bool``. ``True`` if the output is a terminal.
 * ``version``: ``str``. A version number. Also see :func:`cute`.
+
 """
 
 task_converter = TaskConverter()
