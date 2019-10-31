@@ -9,7 +9,6 @@ python:
 install:
   - python -m pip install -U pip
   - pip install -e .
-  # https://github.com/pypa/pip/issues/6371
-  - pip install --ignore-requires-python -v -r requirements-lock.txt 
+  - xargs -a requirements-lock.txt pip install || true
 script:
   - python cute.py test
