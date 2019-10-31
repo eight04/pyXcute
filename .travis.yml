@@ -10,6 +10,6 @@ install:
   - python -m pip install -U pip
   - pip install -e .
   # https://github.com/pypa/pip/issues/6371
-  - pip install -r requirements-lock.txt --python-version 3.8 --no-deps
+  - pip install --ignore-requires-python -v -r requirements-lock.txt 
 script:
   - python cute.py test
