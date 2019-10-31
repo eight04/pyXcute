@@ -8,6 +8,6 @@ python:
   - "3.8"
 install:
   - pip install -e .
-  - python -c "import sys;exit(sys.version_info >= (3, 5))" || pip install -r requirements-lock.txt
+  - pip install -r requirements-lock.txt --ignore-requires-python
 script:
   - python cute.py test
