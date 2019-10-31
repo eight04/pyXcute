@@ -8,7 +8,6 @@ python:
   - "3.8"
 install:
   - pip install -e .
-  # we only run pylint on latest python
-  - if [[ $TRAVIS_PYTHON_VERSION == '3.8' ]]; then pip install -r requirements-lock; fi
+  - python -c "import sys;exit(sys.version_info >= (3, 5))" || pip install -r requirements-lock.txt
 script:
   - python cute.py test
