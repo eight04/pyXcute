@@ -43,6 +43,9 @@ Classes
 .. autoclass:: Cmd
   :members: __call__
   
+.. autoclass:: LiveReload
+  :members: __call__
+  
 .. autoclass:: Log
   :members: __call__
   
