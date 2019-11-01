@@ -400,7 +400,8 @@ class LiveReload:
         """When called, spawn a `livereload <https://github.com/lepture/python-livereload>`__
         server.
         
-        `A live example <https://github.com/eight04/pyXcute/blob/master/cute.py>`__
+        `A live example
+        <https://github.com/eight04/pyXcute/blob/0f4815795f76a49fbf5edbe136bf83376f98ca75/cute.py#L33-L35>`__.
         """
         from livereload import Server
         # pylint: disable=no-member
