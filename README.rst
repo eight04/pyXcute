@@ -216,6 +216,10 @@ http://pyxcute.readthedocs.io/en/latest/
 Changelog
 ---------
 
+* 0.6.0 (Nov 1, 2019)
+
+  - Add: ``LiveReload``.
+
 * 0.5.2 (Jun 14, 2018)
 
   - Add: support ``bumper`` argument in ``Bump``.
