@@ -7,9 +7,9 @@ import datetime
 from inspect import isclass
 import re
 try:
-    import pathlib2 as pathlib
-except ImportError:
     import pathlib
+except ImportError:
+    import pathlib2 as pathlib
 import sys
 import shlex
 import subprocess
@@ -379,6 +379,41 @@ class Try:
                 run_task(task, *args)
             except Exception as err: # pylint: disable=broad-except
                 log(err)
+                
+class LiveReload:
+    """An executor which spawns a live-reload server."""
+    def __init__(self, pattern, task, html_base, **kwargs):
+        """
+        :arg pattern: Glob pattern, filename, or folder to be watched.
+        :type pattern: str or list[str]
+        :arg task: A task that should be run when the file changes.
+        :arg str html_base: Path to the folder containing HTML files.
+        :arg kwargs: Other arguments will be passed to `Server.serve
+            <https://github.com/lepture/python-livereload/blob/d5f6a2e3fab5e4308dc744e26792ce83581703d9/livereload/server.py#L275>`__
+        """
+        self.pattern = [pattern] if isinstance(pattern, str) else pattern
+        self.task = task
+        self.html_base = html_base
+        self.kwargs = kwargs
+        
+    def __call__(self):
+        """When called, spawn a `livereload <https://github.com/lepture/python-livereload>`__
+        server.
+        
+        `A live example <https://github.com/eight04/pyXcute/blob/master/cute.py>`__
+        """
+        from livereload import Server
+        # pylint: disable=no-member
+        # https://github.com/lepture/python-livereload/issues/209
+        import asyncio
+        try:
+            asyncio.set_event_loop_policy(asyncio.WindowsSelectorEventLoopPolicy())
+        except AttributeError:
+            pass
+        server = Server()
+        for p in self.pattern:
+            server.watch(f(p), lambda: run_task(self.task))
+        server.serve(open_url_delay=1, root=self.html_base, **self.kwargs)
 
 def cute(**tasks):
     """Main entry point.
@@ -431,10 +466,10 @@ def cute(**tasks):
     except subprocess.CalledProcessError as err:
         # printing stack trace of process error doesn't help
         log(err)
-        exit(1)
+        sys.exit(1)
     except Exception: # pylint: disable=broad-except
         traceback.print_exc()
-        exit(1)
+        sys.exit(1)
     
 def parse_args(args=None):
     """Parse sys.argv. Export "init", "args" to config."""
@@ -545,8 +580,7 @@ conf = {
 }
 """A dictionary that is used across all tasks. It has 2 purpoeses: 
 
-1. A convenience way to share variables between your ``cute.py`` file and 
-  ``xcute`` module.
+1. A convenience way to share variables between your ``cute.py`` file and ``xcute`` module.
 2. The context for string formatting. See :func:`f`.
 
 By default, it has following keys:
@@ -572,6 +606,7 @@ By default, it has following keys:
 * ``tasks``: ``dict``. This is what you send to :func:`cute`.
 * ``tty``: ``bool``. ``True`` if the output is a terminal.
 * ``version``: ``str``. A version number. Also see :func:`cute`.
+
 """
 
 task_converter = TaskConverter()

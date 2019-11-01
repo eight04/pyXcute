@@ -6,7 +6,8 @@ disable=
 	design,
 	
 	missing-docstring,
-	trailing-whitespace
+	trailing-whitespace,
+  import-outside-toplevel
 
 [BASIC]
 variable-rgx=^[a-z_]{1,}$
