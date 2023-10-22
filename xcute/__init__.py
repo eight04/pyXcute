@@ -162,18 +162,21 @@ def semver_bumper(old_version, part="patch"):
         
 class Bump:
     """An executor which can bump the version inside a .py file."""
-    def __init__(self, file, bumper=semver_bumper):
+    def __init__(self, file, bumper=semver_bumper, cfgs=["setup.cfg", "pyproject.toml"]):
         """
         :arg str file: Input file.
         :arg callable bumper: A callable that would bump a version. The
             signature is ``bumper(version: str, *args) -> new_version: str``.
             Default to :func:`semver_bumper`.
+        :arg list[str] cfgs: A list of config files. The version number inside
+            these files would be updated to the new version.
         """
         self.file = file
         self.bumper = bumper
+        self.cfgs = cfgs
         
     def __call__(self, *args):
-        """When called, it bumps the version number of the file. Additional
+        r"""When called, it bumps the version number of the file. Additional
         arguments are sent to ``bumper``.
 
         It uses :func:`split_version` to find the version. After bumping, it
@@ -181,8 +184,9 @@ class Bump:
 
         1. Assign the old version to ``conf["old_version"]``
         2. Assign the new version to ``conf["version"]``
-        3. Try to find the version number inside ``setup.cfg`` and update it to
-           the new version.
+        3. Try to find the version number inside configs and update to
+           the new version. The version number is matched by the regular expression
+           ``^version\s*=\s*["']?(\S+?)["']?\s*$``.
         """
         file = pathlib.Path(f(self.file))
         left, old_version, right = split_version(file.read_text(encoding="utf-8"))
@@ -195,17 +199,18 @@ class Bump:
             old_version=old_version,
             version=version
         ))
-        cfg = pathlib.Path("setup.cfg")
-        try:
-            cfg_content = cfg.read_text(encoding="utf-8")
-        except IOError:
-            return
-        match = re.search(r"^version\s*=\s*(\S+?)\s*$", cfg_content, re.M)
-        if not match:
-            return
-        new_cfg_content = cfg_content[:match.start(1)] + version + cfg_content[match.end(1):]
-        cfg.write_text(new_cfg_content, encoding="utf-8")
-        log("Update the version number inside setup.cfg")
+        for path in self.cfgs:
+            cfg = pathlib.Path(f(path))
+            try:
+                cfg_content = cfg.read_text(encoding="utf-8")
+            except IOError:
+                continue
+            match = re.search(r"^version\s*=\s*[\"']?(\S+?)[\"']?\s*$", cfg_content, re.M)
+            if not match:
+                continue
+            new_cfg_content = cfg_content[:match.start(1)] + version + cfg_content[match.end(1):]
+            cfg.write_text(new_cfg_content, encoding="utf-8")
+            log(f"Update the version number inside {cfg} to {version}")
             
 class Task:
     """Run conf["tasks"][name]"""
