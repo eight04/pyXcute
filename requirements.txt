@@ -1,6 +1,5 @@
-Pygments==2.4.2
-Sphinx==2.2.1
-docutils==0.15.2
+Pygments==2.16.1
+Sphinx==7.2.6
+docutils==0.20.1
 pylint==3.0.1
-twine==2.0.0
-wheel==0.33.6
+twine==4.0.2
