@@ -10,7 +10,7 @@ cute(
     test = [Skip("lint", sys.version_info < (3, 8)), 'python test.py', 'readme_build'],
     bump_pre = 'test',
     bump_post = ['clean', 'dist', 'release', 'publish', 'install'],
-    clean = 'x-clean build dist *.egg-info',
+    clean = 'x-clean build dist',
     dist = 'python setup.py sdist bdist_wheel',
     release = [
         'git add .',
