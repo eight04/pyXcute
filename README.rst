@@ -1,15 +1,13 @@
 pyXcute
 =======
 
-.. image:: https://api.codacy.com/project/badge/Grade/6ffe1c58a9f7404293f870a5183d8ad8    
-  :target: https://www.codacy.com/app/eight04/pyXcute?utm_source=github.com&amp;utm_medium=referral&amp;utm_content=eight04/pyXcute&amp;utm_campaign=Badge_Grade
-  
-.. image:: https://travis-ci.org/eight04/pyXcute.svg?branch=master
-  :target: https://travis-ci.org/eight04/pyXcute
-    
 .. image:: http://readthedocs.org/projects/pyxcute/badge/?version=latest
   :target: http://pyxcute.readthedocs.io/en/latest/?badge=latest
   :alt: Documentation Status
+
+.. image:: https://github.com/eight04/pyXcute/actions/workflows/build.yml/badge.svg
+  :target: https://github.com/eight04/pyXcute/actions/workflows/build.yml
+  :alt: .github/workflows/build.yml
 
 A small task runner inspired by npm scripts.
 
@@ -215,6 +213,11 @@ http://pyxcute.readthedocs.io/en/latest/
   
 Changelog
 ---------
+
+* 0.7.0 (Oct 22, 2023)
+
+  - Change: now we only test pyxcute on Python>=3.7.
+  - Add: ``cfg`` argument in ``Bump``.
 
 * 0.6.0 (Nov 1, 2019)
 
