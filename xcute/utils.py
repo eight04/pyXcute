@@ -46,10 +46,7 @@ def iter_files(src, patterns, ignores=None, no_subdir=False, no_dir=False):
         print("No file is matched.")
         
 def base_parser(description):
-    try:
-        from pathlib2 import Path
-    except ImportError:
-        from pathlib import Path
+    from pathlib import Path
     from argparse import ArgumentParser
     
     parser = ArgumentParser(description=description)
@@ -101,10 +98,7 @@ def concat():
         print(file.read_text("utf-8"), end=args.end)
     
 def copy():
-    try:
-        from pathlib2 import Path
-    except ImportError:
-        from pathlib import Path
+    from pathlib import Path
     from shutil import copy2
     
     add, parse, files = base_parser(
@@ -127,10 +121,7 @@ def copy():
     
 def pipe():
     from argparse import ArgumentParser
-    try:
-        from pathlib2 import Path
-    except ImportError:
-        from pathlib import Path
+    from pathlib import Path
     from sys import stdin
 
     parser = ArgumentParser(

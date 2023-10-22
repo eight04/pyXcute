@@ -6,10 +6,7 @@ from contextlib import contextmanager
 import datetime
 from inspect import isclass
 import re
-try:
-    import pathlib
-except ImportError:
-    import pathlib2 as pathlib
+import pathlib
 import sys
 import shlex
 import subprocess
@@ -162,7 +159,7 @@ def semver_bumper(old_version, part="patch"):
         
 class Bump:
     """An executor which can bump the version inside a .py file."""
-    def __init__(self, file, bumper=semver_bumper, cfgs=["setup.cfg", "pyproject.toml"]):
+    def __init__(self, file, bumper=semver_bumper, cfgs=("setup.cfg", "pyproject.toml")):
         """
         :arg str file: Input file.
         :arg callable bumper: A callable that would bump a version. The
