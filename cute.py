@@ -11,7 +11,7 @@ cute(
     bump_pre = 'test',
     bump_post = ['clean', 'dist', 'release', 'publish', 'install'],
     clean = 'x-clean build dist',
-    dist = 'python setup.py sdist bdist_wheel',
+    dist = 'python -m build',
     release = [
         'git add .',
         'git commit -m "Release v{version}"',
