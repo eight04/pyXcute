@@ -2,6 +2,21 @@
 
 from __future__ import print_function
 
+def natsorted(seq, key=str):
+    """Natural sort a sequence.
+    
+    :arg seq: Sequence to be sorted.
+    :arg key: Key function to be applied to each element.
+    """
+
+    from re import split
+    
+    def _natsorted_key(s):
+        return [int(text) if text.isdigit() else text.lower()
+                for text in split("([0-9]+)", s)]
+        
+    return sorted(seq, key=lambda x: _natsorted_key(key(x)))
+
 def iter_files(src, patterns, ignores=None, no_subdir=False, no_dir=False):
     """Iter through files/folders matching glob patterns.
     
@@ -16,7 +31,6 @@ def iter_files(src, patterns, ignores=None, no_subdir=False, no_dir=False):
     """
         
     from ordered_set import OrderedSet
-    from natsort import natsorted
     
     processed = OrderedSet()
 
