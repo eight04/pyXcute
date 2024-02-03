@@ -214,6 +214,10 @@ http://pyxcute.readthedocs.io/en/latest/
 Changelog
 ---------
 
+* 0.8.0 (Feb 4, 2024)
+
+  - Change: drop natsort, implement filename sorting by ourselves.
+
 * 0.7.0 (Oct 22, 2023)
 
   - Change: now we only test pyxcute on Python>=3.7.
