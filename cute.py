@@ -7,7 +7,7 @@ from xcute import cute, Skip, LiveReload
 cute(
     pkg_name = 'xcute',
     lint = 'pylint xcute cute setup',
-    test = [Skip("lint", sys.version_info < (3, 8)), 'python test.py', 'readme_build'],
+    test = [Skip("lint", sys.version_info < (3, 12)), 'python test.py', 'readme_build'],
     bump_pre = 'test',
     bump_post = ['clean', 'dist', 'release', 'publish', 'install'],
     clean = 'x-clean build dist',
@@ -24,9 +24,9 @@ cute(
     install = 'pip install -e .',
     install_err = 'elevate -c -w pip install -e .',
     readme_build = [
-        'python setup.py --long-description | x-pipe build/readme/index.rst',
+        # 'python setup.py --long-description | x-pipe build/readme/index.rst',
         ('rst2html5.py --no-raw --exit-status=1 --verbose '
-         'build/readme/index.rst build/readme/index.html')
+         'README.rst | x-pipe build/readme/index.html')
     ],
     readme_pre = "readme_build",
     readme = LiveReload("README.rst", "readme_build", "build/readme"),
