@@ -7,7 +7,7 @@ from xcute import cute, Skip, LiveReload
 cute(
     pkg_name = 'xcute',
     lint = 'pylint xcute cute setup',
-    test = [Skip("lint", sys.version_info < (3, 8)), 'python test.py', 'readme_build'],
+    test = [Skip("lint", sys.version_info < (3, 12)), 'python test.py', 'readme_build'],
     bump_pre = 'test',
     bump_post = ['clean', 'dist', 'release', 'publish', 'install'],
     clean = 'x-clean build dist',
