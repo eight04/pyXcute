@@ -43,6 +43,7 @@ sphinxcontrib-htmlhelp==2.0.4
 sphinxcontrib-jsmath==1.0.1
 sphinxcontrib-qthelp==1.0.6
 sphinxcontrib-serializinghtml==1.1.9
+tomli==2.0.1
 tomlkit==0.12.1
 tornado==6.3.3
 twine==4.0.2
